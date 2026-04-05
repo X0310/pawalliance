@@ -8,14 +8,7 @@
   <style>
     .char-count { font-size: 12px; color: var(--text-hint); text-align: right; margin-top: 4px; }
     .submit-tip { font-size: 13px; color: var(--text-hint); margin-top: 8px; }
-    /* 聊天室预留入口（隐藏，后续启用） */
-    .chat-coming {
-      background: var(--cream-dark); border-radius: var(--radius-md);
-      border: 1px dashed var(--cream-border);
-      padding: 1.5rem; text-align: center; margin-bottom: 2rem;
-      color: var(--text-hint); font-size: 14px;
-    }
-    /* TODO: 接入 Supabase 后，删除 localStorage 相关代码，替换为 API 调用 */
+    .loading { text-align: center; color: var(--text-hint); padding: 2rem; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -45,16 +38,6 @@
   <section class="section" style="padding-top: 1rem;">
     <div class="container">
       <div class="message-wrap">
-
-        <!-- 聊天室预留入口 -->
-        <!-- ✏️ 后续启用聊天室：删除注释，接入实时数据库 -->
-        <!--
-        <div class="chat-coming">
-          🔧 实时聊天室（即将上线）
-        </div>
-        -->
-
-        <!-- 留言表单 -->
         <div class="message-form">
           <h3>发表留言</h3>
           <div class="form-group">
@@ -67,14 +50,11 @@
             <div class="char-count"><span id="charCount">0</span> / 300</div>
           </div>
           <button class="btn btn-primary" onclick="submitMessage()">提交留言</button>
-          <p class="submit-tip">留言提交后，管理员审核通过后显示。</p>
+          <p class="submit-tip">留言提交后即时显示，感谢你的参与 🐾</p>
         </div>
-
-        <!-- 留言列表 -->
         <div class="message-list" id="messageList">
-          <!-- 留言由 JS 动态生成 -->
+          <p class="loading">加载中…</p>
         </div>
-
       </div>
     </div>
   </section>
@@ -88,14 +68,25 @@
 
   <script src="main.js"></script>
   <script>
-    // ============================================================
-    // 留言板逻辑
-    // 当前使用 localStorage 本地存储（适合 GitHub Pages 静态网站）
-    // ✏️ TODO：接入 Supabase 后，替换 loadMessages / submitMessage 函数
-    //    参考：https://supabase.com/docs/guides/database
-    // ============================================================
+    const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_CnTKW2BNZWkGRKxTnHxxZA_Vt0Lc_IU";
 
-    // 字数统计
+    async function supabaseRequest(method, body = null) {
+      const options = {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Prefer": method === "POST" ? "return=representation" : ""
+        }
+      };
+      if (body) options.body = JSON.stringify(body);
+      const url = SUPABASE_URL + "/rest/v1/messages" + (method === "GET" ? "?select=*&order=created_at.desc" : "");
+      const res = await fetch(url, options);
+      return res.json();
+    }
+
     const msgContent = document.getElementById("msgContent");
     const charCount = document.getElementById("charCount");
     if (msgContent) {
@@ -104,55 +95,52 @@
       });
     }
 
-    // 加载留言（当前从 localStorage 读取）
-    function loadMessages() {
+    async function loadMessages() {
       const el = document.getElementById("messageList");
-      if (!el) return;
-      const messages = JSON.parse(localStorage.getItem("paw_messages") || "[]");
-
-      if (messages.length === 0) {
-        el.innerHTML = `<p class="empty-tip">还没有留言，来成为第一位吧～</p>`;
-        return;
+      try {
+        const messages = await supabaseRequest("GET");
+        if (!messages || messages.length === 0) {
+          el.innerHTML = '<p class="empty-tip">还没有留言，来成为第一位吧～</p>';
+          return;
+        }
+        el.innerHTML = messages.map(function(msg) {
+          return '<div class="message-item">' +
+            '<div><span class="message-author">' + escapeHtml(msg.name) + '</span>' +
+            '<span class="message-time">' + (msg.created_at ? msg.created_at.slice(0,10) : "") + '</span></div>' +
+            '<div class="message-content">' + escapeHtml(msg.content) + '</div>' +
+            (msg.reply ? '<div class="message-reply"><div class="message-reply-label">🐾 PawAlliance 回复</div><div class="message-reply-content">' + escapeHtml(msg.reply) + '</div></div>' : "") +
+            '</div>';
+        }).join("");
+      } catch(e) {
+        el.innerHTML = '<p class="empty-tip">加载失败，请刷新页面重试 😿</p>';
       }
-
-      el.innerHTML = messages.map(msg => `
-        <div class="message-item">
-          <div>
-            <span class="message-author">${escapeHtml(msg.name)}</span>
-            <span class="message-time">${msg.time}</span>
-          </div>
-          <div class="message-content">${escapeHtml(msg.content)}</div>
-          ${msg.reply ? `
-            <div class="message-reply">
-              <div class="message-reply-label">🐾 PawAlliance 回复</div>
-              <div class="message-reply-content">${escapeHtml(msg.reply)}</div>
-            </div>
-          ` : ""}
-        </div>
-      `).join("");
     }
 
-    // 提交留言
-    function submitMessage() {
+    async function submitMessage() {
       const name = document.getElementById("msgName").value.trim();
       const content = document.getElementById("msgContent").value.trim();
       if (!name) { alert("请填写昵称"); return; }
       if (!content) { alert("请填写留言内容"); return; }
-
-      const messages = JSON.parse(localStorage.getItem("paw_messages") || "[]");
-      const now = new Date();
-      const time = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-      messages.unshift({ name, content, time, reply: "" });
-      localStorage.setItem("paw_messages", JSON.stringify(messages));
-
-      document.getElementById("msgName").value = "";
-      document.getElementById("msgContent").value = "";
-      charCount.textContent = "0";
-      loadMessages();
-      alert("留言提交成功！感谢你的支持 🐾");
+      const btn = document.querySelector(".message-form .btn");
+      btn.textContent = "提交中…";
+      btn.disabled = true;
+      try {
+        await supabaseRequest("POST", { name: name, content: content, reply: "" });
+        document.getElementById("msgName").value = "";
+        document.getElementById("msgContent").value = "";
+        charCount.textContent = "0";
+        await loadMessages();
+        alert("留言提交成功！感谢你的支持 🐾");
+      } catch(e) {
+        alert("提交失败，请检查网络后重试 😿");
+      } finally {
+        btn.textContent = "提交留言";
+        btn.disabled = false;
+      }
     }
 
     function escapeHtml(str) {
+      if (!str) return "";
       return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
 
