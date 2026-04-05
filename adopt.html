@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>云养计划 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .feed-btn-wrap { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .cat-mood {
+      font-size: 56px; text-align: center; margin: 1rem 0;
+      transition: all 0.4s ease;
+      display: block;
+    }
+    .feed-result {
+      display: none; background: var(--cream-dark); border-radius: var(--radius-md);
+      padding: 1rem; margin-top: 1rem; text-align: center;
+    }
+    .feed-result.show { display: block; }
+    .feed-result p { font-size: 14px; color: var(--text-muted); }
+    .payment-modal {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(50,30,10,0.4); align-items: center; justify-content: center;
+    }
+    .payment-modal.open { display: flex; }
+    .payment-box {
+      background: var(--white); border-radius: var(--radius-xl);
+      padding: 2.5rem; max-width: 380px; width: 90%; text-align: center;
+    }
+    .payment-box h3 { font-size: 18px; font-weight: 500; margin-bottom: 0.5rem; color: var(--brown-dark); }
+    .payment-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .payment-options { display: flex; gap: 12px; justify-content: center; margin-bottom: 1.5rem; }
+    .pay-option {
+      flex: 1; padding: 12px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--cream-border); cursor: pointer;
+      font-size: 14px; background: var(--cream);
+      transition: all 0.2s;
+    }
+    .pay-option:hover, .pay-option.selected {
+      border-color: var(--brown-light); background: var(--cream-dark);
+    }
+    .pay-amount { font-size: 22px; font-weight: 600; color: var(--brown-mid); margin: 1rem 0; }
+    .modal-close { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-hint); margin-top: 1rem; }
+    .adopt-intro {
+      background: var(--white); border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-border); padding: 2rem; margin-bottom: 2rem;
+    }
+    .adopt-intro h2 { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; margin-bottom: 0.8rem; color: var(--brown-dark); }
+    .adopt-intro p { font-size: 14px; color: var(--text-muted); line-height: 2; }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link active">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>云养计划</h1>
+    <p>不在现场，也能参与守护</p>
+  </div>
+
+  <section class="section" style="padding-top: 1rem;">
+    <div class="container">
+      <div class="adopt-page-wrap">
+
+        <div class="adopt-intro">
+          <h2>什么是云养计划？</h2>
+          <p>云养计划是 PawAlliance 推出的虚拟参与方式。你可以通过线上点击"投喂"按钮，象征性地参与猫咪的日常照料。每一次投喂都会被我们认真记录，并定期折算为真实的猫粮、医疗支持和生活用品。</p>
+          <p>你的每一次点击，都是对这个项目最真实的支持。</p>
+        </div>
+
+        <div class="adopt-cats-list" id="adoptCatsList">
+          <!-- 由 JS 动态生成 -->
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 支付弹窗（模拟） -->
+  <div class="payment-modal" id="paymentModal">
+    <div class="payment-box">
+      <div id="modalCatMood" class="cat-mood">🐱</div>
+      <h3>选择投喂方式</h3>
+      <p id="modalCatName">为异瞳投喂一顿美食</p>
+      <div class="payment-options">
+        <div class="pay-option selected" onclick="selectPay(this, 1)">
+          <div>小份猫粮</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:4px">¥ 1</div>
+        </div>
+        <div class="pay-option" onclick="selectPay(this, 5)">
+          <div>营养罐头</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:4px">¥ 5</div>
+        </div>
+        <div class="pay-option" onclick="selectPay(this, 10)">
+          <div>豪华大餐</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:4px">¥ 10</div>
+        </div>
+      </div>
+      <div class="pay-amount">¥ <span id="payAmount">1</span></div>
+
+      <!-- 🔧 TODO：接入真实支付时，替换下面按钮的 onclick 为支付 API 调用 -->
+      <button class="btn btn-primary" style="width:100%" onclick="confirmFeed()">确认投喂（模拟）</button>
+      <button class="modal-close" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
+
+  <script src="cats-data.js"></script>
+  <script src="main.js"></script>
+  <script>
+    // 渲染云养猫咪列表
+    function renderAdoptList() {
+      const el = document.getElementById("adoptCatsList");
+      if (!el) return;
+      const realCats = CATS_DATA.filter(c => c.id !== "coming-soon");
+      if (realCats.length === 0) {
+        el.innerHTML = `<p class="empty-tip">暂无猫咪，敬请期待～</p>`;
+        return;
+      }
+      el.innerHTML = realCats.map(cat => {
+        const feedKey = `feed_${cat.id}`;
+        const feedCount = parseInt(localStorage.getItem(feedKey) || "0");
+        const photoHTML = cat.photo
+          ? `<img src="${cat.photo}" alt="${cat.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="adopt-cat-emoji" style="display:none;font-size:48px;width:100%;height:100%;align-items:center;justify-content:center;">🐱</div>`
+          : `<div style="font-size:48px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">🐱</div>`;
+        return `
+          <div class="adopt-cat-item" id="adoptItem_${cat.id}">
+            <div class="adopt-cat-avatar">${photoHTML}</div>
+            <div class="adopt-cat-content">
+              <h3>${cat.name}</h3>
+              <p>${cat.story || cat.personality}</p>
+              <div class="feed-btn-wrap">
+                <button class="btn btn-primary" onclick="openFeedModal('${cat.id}', '${cat.name}')">
+                  投喂 ${cat.name}
+                </button>
+              </div>
+              <p class="feed-count" id="feedCount_${cat.id}">累计投喂：${feedCount} 次</p>
+              <div class="feed-result" id="feedResult_${cat.id}">
+                <p id="feedResultText_${cat.id}"></p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    renderAdoptList();
+
+    // 当前操作的猫
+    let currentCatId = "";
+    let currentAmount = 1;
+
+    function openFeedModal(catId, catName) {
+      currentCatId = catId;
+      document.getElementById("modalCatName").textContent = `为${catName}投喂一顿美食`;
+      document.getElementById("modalCatMood").textContent = "🐱";
+      document.getElementById("payAmount").textContent = "1";
+      currentAmount = 1;
+      document.querySelectorAll(".pay-option").forEach((el, i) => {
+        el.classList.toggle("selected", i === 0);
+      });
+      document.getElementById("paymentModal").classList.add("open");
+    }
+
+    function selectPay(el, amount) {
+      document.querySelectorAll(".pay-option").forEach(e => e.classList.remove("selected"));
+      el.classList.add("selected");
+      currentAmount = amount;
+      document.getElementById("payAmount").textContent = amount;
+    }
+
+    function closeModal() {
+      document.getElementById("paymentModal").classList.remove("open");
+    }
+
+    function confirmFeed() {
+      // 模拟支付成功
+      const feedKey = `feed_${currentCatId}`;
+      const count = parseInt(localStorage.getItem(feedKey) || "0") + 1;
+      localStorage.setItem(feedKey, count);
+
+      // 更新次数显示
+      const countEl = document.getElementById(`feedCount_${currentCatId}`);
+      if (countEl) countEl.textContent = `累计投喂：${count} 次`;
+
+      // 显示反馈
+      const resultEl = document.getElementById(`feedResult_${currentCatId}`);
+      const resultTextEl = document.getElementById(`feedResultText_${currentCatId}`);
+      const mood = document.getElementById("modalCatMood");
+
+      const reactions = [
+        { emoji: "😸", text: "太开心了！小猫咪吃得津津有味，还在原地转圈圈！" },
+        { emoji: "🥰", text: "好好吃哦～小猫咪感受到了你的爱意！" },
+        { emoji: "😋", text: "美味！小猫咪竖起尾巴表示满意！" },
+        { emoji: "🐾", text: "谢谢你的投喂，小猫咪向你比了个爪！" },
+      ];
+      const r = reactions[Math.floor(Math.random() * reactions.length)];
+      mood.textContent = r.emoji;
+
+      setTimeout(() => {
+        closeModal();
+        if (resultTextEl) resultTextEl.textContent = r.text;
+        if (resultEl) resultEl.classList.add("show");
+      }, 800);
+    }
+
+    // 点击遮罩关闭
+    document.getElementById("paymentModal").addEventListener("click", function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+</body>
+</html>

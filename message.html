@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>留言板 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .char-count { font-size: 12px; color: var(--text-hint); text-align: right; margin-top: 4px; }
+    .submit-tip { font-size: 13px; color: var(--text-hint); margin-top: 8px; }
+    /* 聊天室预留入口（隐藏，后续启用） */
+    .chat-coming {
+      background: var(--cream-dark); border-radius: var(--radius-md);
+      border: 1px dashed var(--cream-border);
+      padding: 1.5rem; text-align: center; margin-bottom: 2rem;
+      color: var(--text-hint); font-size: 14px;
+    }
+    /* TODO: 接入 Supabase 后，删除 localStorage 相关代码，替换为 API 调用 */
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link active">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>留言板</h1>
+    <p>留下你的想法，我们认真阅读每一条留言</p>
+  </div>
+
+  <section class="section" style="padding-top: 1rem;">
+    <div class="container">
+      <div class="message-wrap">
+
+        <!-- 聊天室预留入口 -->
+        <!-- ✏️ 后续启用聊天室：删除注释，接入实时数据库 -->
+        <!--
+        <div class="chat-coming">
+          🔧 实时聊天室（即将上线）
+        </div>
+        -->
+
+        <!-- 留言表单 -->
+        <div class="message-form">
+          <h3>发表留言</h3>
+          <div class="form-group">
+            <label>昵称</label>
+            <input type="text" id="msgName" placeholder="你的昵称" maxlength="20" />
+          </div>
+          <div class="form-group">
+            <label>留言内容</label>
+            <textarea id="msgContent" rows="4" placeholder="写下你想说的话…" maxlength="300"></textarea>
+            <div class="char-count"><span id="charCount">0</span> / 300</div>
+          </div>
+          <button class="btn btn-primary" onclick="submitMessage()">提交留言</button>
+          <p class="submit-tip">留言提交后，管理员审核通过后显示。</p>
+        </div>
+
+        <!-- 留言列表 -->
+        <div class="message-list" id="messageList">
+          <!-- 留言由 JS 动态生成 -->
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    // ============================================================
+    // 留言板逻辑
+    // 当前使用 localStorage 本地存储（适合 GitHub Pages 静态网站）
+    // ✏️ TODO：接入 Supabase 后，替换 loadMessages / submitMessage 函数
+    //    参考：https://supabase.com/docs/guides/database
+    // ============================================================
+
+    // 字数统计
+    const msgContent = document.getElementById("msgContent");
+    const charCount = document.getElementById("charCount");
+    if (msgContent) {
+      msgContent.addEventListener("input", () => {
+        charCount.textContent = msgContent.value.length;
+      });
+    }
+
+    // 加载留言（当前从 localStorage 读取）
+    function loadMessages() {
+      const el = document.getElementById("messageList");
+      if (!el) return;
+      const messages = JSON.parse(localStorage.getItem("paw_messages") || "[]");
+
+      if (messages.length === 0) {
+        el.innerHTML = `<p class="empty-tip">还没有留言，来成为第一位吧～</p>`;
+        return;
+      }
+
+      el.innerHTML = messages.map(msg => `
+        <div class="message-item">
+          <div>
+            <span class="message-author">${escapeHtml(msg.name)}</span>
+            <span class="message-time">${msg.time}</span>
+          </div>
+          <div class="message-content">${escapeHtml(msg.content)}</div>
+          ${msg.reply ? `
+            <div class="message-reply">
+              <div class="message-reply-label">🐾 PawAlliance 回复</div>
+              <div class="message-reply-content">${escapeHtml(msg.reply)}</div>
+            </div>
+          ` : ""}
+        </div>
+      `).join("");
+    }
+
+    // 提交留言
+    function submitMessage() {
+      const name = document.getElementById("msgName").value.trim();
+      const content = document.getElementById("msgContent").value.trim();
+      if (!name) { alert("请填写昵称"); return; }
+      if (!content) { alert("请填写留言内容"); return; }
+
+      const messages = JSON.parse(localStorage.getItem("paw_messages") || "[]");
+      const now = new Date();
+      const time = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+      messages.unshift({ name, content, time, reply: "" });
+      localStorage.setItem("paw_messages", JSON.stringify(messages));
+
+      document.getElementById("msgName").value = "";
+      document.getElementById("msgContent").value = "";
+      charCount.textContent = "0";
+      loadMessages();
+      alert("留言提交成功！感谢你的支持 🐾");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    loadMessages();
+  </script>
+</body>
+</html>

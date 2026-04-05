@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawAlliance · 以商养善</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo.png" alt="PawAlliance logo" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="logo-fallback">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link active">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+        <!-- ✏️ 扩展导航：复制上面一行，修改链接和文字，即可添加新页面 -->
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 首页 Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">以商养善 · 让爱可持续</p>
+      <h1 class="hero-title">每一次消费<br/>都是一次善举</h1>
+      <p class="hero-sub">PawAlliance 探索流浪猫治理与宠物经济融合的可持续路径，<br/>让每一位用户成为参与者、见证者与共创者。</p>
+      <div class="hero-btns">
+        <a href="adopt.html" class="btn btn-primary">加入云养计划</a>
+        <a href="cats.html" class="btn btn-outline">认识我们的猫</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-cat-card">
+        <img src="assets/cats/yitong.png" alt="异瞳猫" class="hero-cat-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <div class="hero-cat-emoji" style="display:none">🐱</div>
+        <div class="hero-cat-label">
+          <span class="cat-tag">异瞳</span>
+          <span class="cat-name-small">我们的第一位居民</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 数据统计 -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <!-- ✏️ 修改数字：直接修改下面 data-target 的值 -->
+        <div class="stat-item">
+          <div class="stat-num" data-target="2">0</div>
+          <div class="stat-label">在册猫咪</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-label">云养用户</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-label">成功送养</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-label">救助行动</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 我们的猫 预览 -->
+  <section class="section cats-preview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">认识我们的猫</h2>
+        <a href="cats.html" class="see-all">查看全部 →</a>
+      </div>
+      <div class="cats-grid" id="catsPreview">
+        <!-- 猫咪卡片由 cats-data.js 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 云养计划 预览 -->
+  <section class="section adopt-preview">
+    <div class="container adopt-inner">
+      <div class="adopt-text">
+        <h2 class="section-title">云养计划</h2>
+        <p>不在现场，也能参与守护。<br/>每一次虚拟投喂，都会转化为真实的猫粮与医疗支持。<br/>你的每一次点击，都被我们认真记录。</p>
+        <a href="adopt.html" class="btn btn-primary" style="margin-top:1.5rem;display:inline-block">立即参与</a>
+      </div>
+      <div class="adopt-visual">
+        <div class="adopt-cat-wrap">
+          <img src="assets/cats/yitong.png" alt="异瞳猫" class="adopt-cat-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="adopt-cat-emoji" style="display:none">😸</div>
+          <div class="adopt-bubble">点我投喂！</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 最新动态 预览 -->
+  <section class="section news-preview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">最新动态</h2>
+        <a href="news.html" class="see-all">查看全部 →</a>
+      </div>
+      <div class="news-list" id="newsPreview">
+        <!-- 动态由 news-data.js 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-text">PawAlliance</span>
+        <p>以商养善，让爱延续</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="cats.html">我们的猫</a>
+        <a href="adopt.html">云养计划</a>
+        <a href="news.html">动态公告</a>
+        <a href="message.html">留言板</a>
+        <a href="about.html">关于我们</a>
+      </div>
+      <p class="footer-copy">© 2026 PawAlliance · All rights reserved</p>
+    </div>
+  </footer>
+
+  <script src="cats-data.js"></script>
+  <script src="news-data.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动态公告 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link active">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>动态公告</h1>
+    <p>记录每一个重要时刻</p>
+  </div>
+
+  <section class="section" style="padding-top: 1rem;">
+    <div class="container" style="max-width: 760px;">
+      <div class="news-list" id="allNews">
+        <!-- 由 news-data.js 自动生成 -->
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
+
+  <script src="news-data.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>猫咪详情 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .cat-detail-wrap { max-width: 760px; margin: 0 auto; }
+    .cat-detail-card {
+      background: var(--white); border-radius: var(--radius-xl);
+      border: 1px solid var(--cream-border); overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+    .cat-detail-photo {
+      width: 100%; height: 360px;
+      background: var(--cream-dark);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .cat-detail-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .cat-detail-photo-emoji { font-size: 80px; }
+    .cat-detail-body { padding: 2rem; }
+    .cat-detail-name { font-family: 'Noto Serif SC', serif; font-size: 2rem; font-weight: 500; color: var(--brown-deep); margin-bottom: 0.5rem; }
+    .cat-detail-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .cat-meta-item { font-size: 13px; background: var(--cream-dark); color: var(--text-muted); padding: 4px 12px; border-radius: 10px; }
+    .cat-detail-story { font-size: 15px; color: var(--text-muted); line-height: 2; margin-bottom: 2rem; }
+    .cat-detail-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1 id="pageTitle">猫咪详情</h1>
+    <p><a href="cats.html" style="color:var(--brown-mid)">← 返回全部猫咪</a></p>
+  </div>
+
+  <section class="section" style="padding-top: 1rem;">
+    <div class="container">
+      <div class="cat-detail-wrap">
+        <div class="cat-detail-card" id="catDetailCard">
+          <p class="empty-tip" style="padding:3rem">加载中…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
+
+  <script src="cats-data.js"></script>
+  <script src="main.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const catId = params.get("id");
+    const cat = CATS_DATA.find(c => c.id === catId);
+    const card = document.getElementById("catDetailCard");
+
+    if (!cat || cat.id === "coming-soon") {
+      card.innerHTML = `<p class="empty-tip" style="padding:3rem">找不到这只猫咪的信息 😿</p>`;
+    } else {
+      document.title = `${cat.name} · PawAlliance`;
+      document.getElementById("pageTitle").textContent = cat.name;
+
+      const photoHTML = cat.photo
+        ? `<img src="${cat.photo}" alt="${cat.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="cat-detail-photo-emoji" style="display:none">🐱</div>`
+        : `<div class="cat-detail-photo-emoji">🐱</div>`;
+
+      card.innerHTML = `
+        <div class="cat-detail-photo">${photoHTML}</div>
+        <div class="cat-detail-body">
+          <h1 class="cat-detail-name">${cat.name}</h1>
+          <div class="cat-detail-meta">
+            <span class="cat-meta-item">年龄：${cat.age}</span>
+            <span class="cat-meta-item">毛色：${cat.color}</span>
+            <span class="cat-meta-item">性别：${cat.gender}</span>
+            <span class="cat-meta-item">状态：${cat.status}</span>
+            ${cat.joinDate ? `<span class="cat-meta-item">加入：${cat.joinDate}</span>` : ""}
+          </div>
+          <div class="cat-tags" style="margin-bottom:1.5rem">
+            ${cat.tags.map(t => `<span class="cat-tag-chip">${t}</span>`).join("")}
+          </div>
+          <p class="cat-detail-story">${cat.story || cat.personality}</p>
+          <div class="cat-detail-actions">
+            <a href="adopt.html" class="btn btn-primary">云养 ${cat.name}</a>
+            <a href="cats.html" class="btn btn-outline">返回猫咪列表</a>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
