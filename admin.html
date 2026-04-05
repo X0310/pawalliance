@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .admin-wrap { max-width: 960px; margin: 0 auto; padding: 0 2rem; }
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 0; border-bottom: 1px solid var(--cream-border); margin-bottom: 2rem;
+    }
+    .admin-title { font-size: 20px; font-weight: 500; color: var(--brown-dark); }
+    .tab-bar { display: flex; gap: 8px; margin-bottom: 2rem; }
+    .tab-btn {
+      padding: 8px 20px; border-radius: 20px; font-size: 14px;
+      border: 1px solid var(--cream-border); background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--brown-light); color: var(--brown-deep); border-color: var(--brown-light); }
+
+    /* 登录页 */
+    .login-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: var(--cream);
+    }
+    .login-box {
+      background: var(--white); border-radius: var(--radius-xl);
+      border: 1px solid var(--cream-border); padding: 3rem; width: 360px;
+      box-shadow: var(--shadow-soft);
+    }
+    .login-box h2 { font-size: 20px; font-weight: 500; color: var(--brown-dark); margin-bottom: 0.5rem; }
+    .login-box p { font-size: 13px; color: var(--text-hint); margin-bottom: 2rem; }
+    .login-box .form-group { margin-bottom: 1rem; }
+    .login-box label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+    .login-box input {
+      width: 100%; padding: 10px 14px;
+      background: var(--cream); border: 1px solid var(--cream-border);
+      border-radius: var(--radius-sm); font-size: 14px; color: var(--text-main);
+    }
+    .login-box input:focus { outline: none; border-color: var(--brown-light); }
+    .login-error { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* 表格 */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .data-table th {
+      text-align: left; padding: 10px 12px; background: var(--cream-dark);
+      color: var(--text-muted); font-weight: 500; font-size: 13px;
+      border-bottom: 1px solid var(--cream-border);
+    }
+    .data-table td {
+      padding: 12px; border-bottom: 1px solid var(--cream-border);
+      color: var(--text-main); vertical-align: top;
+    }
+    .data-table tr:hover td { background: var(--cream); }
+    .action-btns { display: flex; gap: 8px; }
+    .btn-edit { background: var(--cream-dark); color: var(--brown-mid); border: 1px solid var(--cream-border); padding: 5px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; }
+    .btn-delete { background: #fde8e8; color: #c0392b; border: 1px solid #f5c6c6; padding: 5px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; }
+
+    /* 弹窗 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(50,30,10,0.4); align-items: flex-start; justify-content: center;
+      padding: 2rem; overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white); border-radius: var(--radius-xl);
+      padding: 2rem; width: 100%; max-width: 640px;
+      box-shadow: var(--shadow-soft); margin: auto;
+    }
+    .modal-box h3 { font-size: 18px; font-weight: 500; color: var(--brown-dark); margin-bottom: 1.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 9px 12px;
+      background: var(--cream); border: 1px solid var(--cream-border);
+      border-radius: var(--radius-sm); font-size: 14px; color: var(--text-main);
+      font-family: inherit; resize: vertical;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: var(--brown-light);
+    }
+    .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 1.5rem; }
+
+    /* 留言管理 */
+    .msg-item {
+      background: var(--white); border: 1px solid var(--cream-border);
+      border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .msg-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .msg-author { font-weight: 500; font-size: 14px; color: var(--brown-dark); }
+    .msg-time { font-size: 12px; color: var(--text-hint); }
+    .msg-content { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
+    .reply-area { display: flex; gap: 8px; margin-top: 8px; }
+    .reply-area input {
+      flex: 1; padding: 8px 12px;
+      background: var(--cream); border: 1px solid var(--cream-border);
+      border-radius: var(--radius-sm); font-size: 13px;
+    }
+    .existing-reply {
+      background: var(--cream-dark); border-radius: var(--radius-sm);
+      padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--text-muted);
+    }
+    .existing-reply-label { font-size: 12px; color: var(--brown-mid); margin-bottom: 4px; }
+
+    .section-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .empty-tip { color: var(--text-hint); font-size: 14px; text-align: center; padding: 3rem 0; }
+    .loading { text-align: center; color: var(--text-hint); padding: 2rem; font-size: 14px; }
+    .status-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px;
+    }
+    .status-在册 { background: #D4E8C2; color: #3A6020; }
+    .status-已送养 { background: #C2D8E8; color: #204060; }
+    .status-医疗中 { background: #F5DCA0; color: #7A5010; }
+  </style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-box">
+    <h2>🐾 PawAlliance 管理后台</h2>
+    <p>请输入管理员密码登录</p>
+    <div class="form-group">
+      <label>管理员密码</label>
+      <input type="password" id="passwordInput" placeholder="输入密码" onkeydown="if(event.key==='Enter')login()" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="login()">登录</button>
+    <p class="login-error" id="loginError">密码错误，请重试</p>
+  </div>
+</div>
+
+<!-- 管理页面 -->
+<div id="adminPage" style="display:none; padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <span class="admin-title">🐾 PawAlliance 管理后台</span>
+      <div style="display:flex;gap:12px;align-items:center">
+        <a href="index.html" class="btn btn-outline btn-sm" style="font-size:13px">返回网站</a>
+        <button class="btn btn-outline btn-sm" onclick="logout()">退出登录</button>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('cats', this)">猫咪档案</button>
+      <button class="tab-btn" onclick="switchTab('messages', this)">留言管理</button>
+    </div>
+
+    <!-- 猫咪档案 Tab -->
+    <div id="tab-cats">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)" id="catsCount">加载中…</span>
+        <button class="btn btn-primary btn-sm" onclick="openCatModal()">+ 新增猫咪</button>
+      </div>
+      <div id="catsList"><p class="loading">加载中…</p></div>
+    </div>
+
+    <!-- 留言管理 Tab -->
+    <div id="tab-messages" style="display:none">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)" id="msgCount">加载中…</span>
+      </div>
+      <div id="msgList"><p class="loading">加载中…</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 猫咪编辑弹窗 -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box">
+    <h3 id="modalTitle">新增猫咪</h3>
+    <input type="hidden" id="editCatId" />
+    <div class="form-grid">
+      <div class="form-group">
+        <label>档案编号</label>
+        <input type="text" id="f_档案编号" placeholder="如 LM-2026-002" />
+      </div>
+      <div class="form-group">
+        <label>昵称 *</label>
+        <input type="text" id="f_昵称" placeholder="猫咪名字" />
+      </div>
+      <div class="form-group">
+        <label>物种</label>
+        <select id="f_物种">
+          <option>猫</option>
+          <option>狗</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>性别</label>
+        <select id="f_性别">
+          <option>未知</option>
+          <option>公</option>
+          <option>母</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>年龄</label>
+        <input type="text" id="f_年龄" placeholder="如 约1岁" />
+      </div>
+      <div class="form-group">
+        <label>毛色</label>
+        <input type="text" id="f_毛色" placeholder="如 橘白色" />
+      </div>
+      <div class="form-group">
+        <label>体型</label>
+        <select id="f_体型">
+          <option>小型</option>
+          <option>中型</option>
+          <option>大型</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>当前状态</label>
+        <select id="f_status">
+          <option value="在册">在册</option>
+          <option value="已送养">已送养</option>
+          <option value="医疗中">医疗中</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>发现时间</label>
+        <input type="text" id="f_发现时间" placeholder="如 2026-01" />
+      </div>
+      <div class="form-group">
+        <label>发现地点</label>
+        <input type="text" id="f_发现地点" placeholder="详细地点" />
+      </div>
+      <div class="form-group full">
+        <label>性格特点</label>
+        <input type="text" id="f_性格" placeholder="如 温顺、活泼、亲人" />
+      </div>
+      <div class="form-group full">
+        <label>特殊习性</label>
+        <input type="text" id="f_特殊习性" placeholder="如 喜欢吃罐头、怕打雷" />
+      </div>
+      <div class="form-group">
+        <label>健康状况</label>
+        <select id="f_健康状况总结">
+          <option>健康</option>
+          <option>轻微伤病</option>
+          <option>重病</option>
+          <option>残疾</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>绝育情况</label>
+        <select id="f_绝育信息">
+          <option>未知</option>
+          <option>已绝育</option>
+          <option>未绝育</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>疫苗记录</label>
+        <input type="text" id="f_疫苗记录" placeholder="如 猫三联已接种" />
+      </div>
+      <div class="form-group full">
+        <label>驱虫记录</label>
+        <input type="text" id="f_驱虫记录" placeholder="如 体内外驱虫已完成" />
+      </div>
+      <div class="form-group full">
+        <label>伤病记录</label>
+        <textarea id="f_伤病记录" rows="2" placeholder="记录伤病情况"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>救助过程记录</label>
+        <textarea id="f_救助过程记录" rows="3" placeholder="记录救助经过"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>领养信息</label>
+        <textarea id="f_领养信息" rows="2" placeholder="领养人信息、回访记录等"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>其他备注</label>
+        <textarea id="f_其他备注" rows="2" placeholder="特殊需求、补充说明等"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>照片链接（photo_url）</label>
+        <input type="text" id="f_photo_url" placeholder="照片的网络地址，暂时可留空" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCatModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveCat()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // 配置
+  // ✏️ 修改管理员密码：把下面 pawalliance2026 改成你想要的密码
+  // ============================================================
+  const ADMIN_PASSWORD = "pawalliance2026";
+  const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
+
+  // ── 登录 ──
+  function login() {
+    const pwd = document.getElementById("passwordInput").value;
+    if (pwd === ADMIN_PASSWORD) {
+      sessionStorage.setItem("paw_admin", "1");
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("adminPage").style.display = "block";
+      loadCats();
+    } else {
+      document.getElementById("loginError").style.display = "block";
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem("paw_admin");
+    location.reload();
+  }
+
+  // 自动检查登录状态
+  if (sessionStorage.getItem("paw_admin") === "1") {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("adminPage").style.display = "block";
+  }
+
+  // ── Tab 切换 ──
+  function switchTab(tab, btn) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-cats").style.display = tab === "cats" ? "block" : "none";
+    document.getElementById("tab-messages").style.display = tab === "messages" ? "block" : "none";
+    if (tab === "cats") loadCats();
+    if (tab === "messages") loadMessages();
+  }
+
+  // ── API 请求 ──
+  async function api(method, table, body = null, id = null) {
+    let url = `${SUPABASE_URL}/rest/v1/${table}`;
+    if (id) url += `?id=eq.${id}`;
+    else if (method === "GET") url += "?select=*&order=created_at.desc";
+    const opts = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Prefer": method === "POST" ? "return=representation" : ""
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if (method === "DELETE" || method === "PATCH") return true;
+    return res.json();
+  }
+
+  // ── 猫咪管理 ──
+  async function loadCats() {
+    const el = document.getElementById("catsList");
+    el.innerHTML = '<p class="loading">加载中…</p>';
+    const cats = await api("GET", "cats");
+    document.getElementById("catsCount").textContent = `共 ${cats.length} 只猫咪`;
+    if (!cats.length) { el.innerHTML = '<p class="empty-tip">还没有猫咪档案，点击右上角新增</p>'; return; }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="data-table">
+      <thead><tr>
+        <th>档案编号</th><th>昵称</th><th>物种</th><th>性别</th><th>状态</th><th>毛色</th><th>健康状况</th><th>操作</th>
+      </tr></thead>
+      <tbody>${cats.map(cat => `
+        <tr>
+          <td>${cat.档案编号 || "-"}</td>
+          <td><strong>${cat.昵称 || "-"}</strong></td>
+          <td>${cat.物种 || "-"}</td>
+          <td>${cat.性别 || "-"}</td>
+          <td><span class="status-badge status-${cat.status}">${cat.status || "-"}</span></td>
+          <td>${cat.毛色 || "-"}</td>
+          <td>${cat.健康状况总结 || "-"}</td>
+          <td><div class="action-btns">
+            <button class="btn-edit" onclick='editCat(${JSON.stringify(cat)})'>编辑</button>
+            <button class="btn-delete" onclick="deleteCat('${cat.id}', '${cat.昵称}')">删除</button>
+          </div></td>
+        </tr>`).join("")}
+      </tbody></table></div>`;
+  }
+
+  function openCatModal(cat = null) {
+    document.getElementById("modalTitle").textContent = cat ? "编辑猫咪档案" : "新增猫咪";
+    document.getElementById("editCatId").value = cat ? cat.id : "";
+    const fields = ["档案编号","昵称","物种","性别","年龄","毛色","体型","status","发现时间","发现地点","性格","特殊习性","健康状况总结","绝育信息","疫苗记录","驱虫记录","伤病记录","救助过程记录","领养信息","其他备注","photo_url"];
+    fields.forEach(f => {
+      const el = document.getElementById("f_" + f);
+      if (el) el.value = cat ? (cat[f] || "") : "";
+    });
+    document.getElementById("catModal").classList.add("open");
+  }
+
+  function editCat(cat) { openCatModal(cat); }
+  function closeCatModal() { document.getElementById("catModal").classList.remove("open"); }
+
+  async function saveCat() {
+    const id = document.getElementById("editCatId").value;
+    const fields = ["档案编号","昵称","物种","性别","年龄","毛色","体型","status","发现时间","发现地点","性格","特殊习性","健康状况总结","绝育信息","疫苗记录","驱虫记录","伤病记录","救助过程记录","领养信息","其他备注","photo_url"];
+    const data = {};
+    fields.forEach(f => {
+      const el = document.getElementById("f_" + f);
+      if (el) data[f] = el.value;
+    });
+    if (!data["昵称"]) { alert("昵称不能为空"); return; }
+    if (id) {
+      await api("PATCH", "cats", data, id);
+    } else {
+      await api("POST", "cats", data);
+    }
+    closeCatModal();
+    loadCats();
+  }
+
+  async function deleteCat(id, name) {
+    if (!confirm(`确定要删除「${name}」的档案吗？此操作不可恢复。`)) return;
+    await api("DELETE", "cats", null, id);
+    loadCats();
+  }
+
+  // ── 留言管理 ──
+  async function loadMessages() {
+    const el = document.getElementById("msgList");
+    el.innerHTML = '<p class="loading">加载中…</p>';
+    const msgs = await api("GET", "messages");
+    document.getElementById("msgCount").textContent = `共 ${msgs.length} 条留言`;
+    if (!msgs.length) { el.innerHTML = '<p class="empty-tip">还没有留言</p>'; return; }
+    el.innerHTML = msgs.map(msg => `
+      <div class="msg-item">
+        <div class="msg-meta">
+          <span class="msg-author">${escHtml(msg.name)}</span>
+          <span class="msg-time">${msg.created_at ? msg.created_at.slice(0,10) : ""}</span>
+          <button class="btn-delete" style="margin-left:auto" onclick="deleteMsg('${msg.id}')">删除</button>
+        </div>
+        <div class="msg-content">${escHtml(msg.content)}</div>
+        ${msg.reply ? `<div class="existing-reply"><div class="existing-reply-label">🐾 已回复</div>${escHtml(msg.reply)}</div>` : ""}
+        <div class="reply-area">
+          <input type="text" id="reply_${msg.id}" placeholder="输入回复内容…" value="${msg.reply ? escHtml(msg.reply) : ""}" />
+          <button class="btn-edit" onclick="replyMsg('${msg.id}')">回复</button>
+        </div>
+      </div>`).join("");
+  }
+
+  async function replyMsg(id) {
+    const reply = document.getElementById("reply_" + id).value.trim();
+    if (!reply) { alert("请输入回复内容"); return; }
+    await api("PATCH", "messages", { reply }, id);
+    loadMessages();
+  }
+
+  async function deleteMsg(id) {
+    if (!confirm("确定删除这条留言吗？")) return;
+    await api("DELETE", "messages", null, id);
+    loadMessages();
+  }
+
+  function escHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // 初始化
+  if (sessionStorage.getItem("paw_admin") === "1") loadCats();
+</script>
+</body>
+</html>
