@@ -1,397 +1,121 @@
-/* ============================================================
-   PawAlliance · 主样式文件
-   自然清新风格 · 米色主调
-   ============================================================ */
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的猫 · PawAlliance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">
+                <div class="logo-fallback" style="display:flex">🐾</div>
+                <span class="logo-text">PawAlliance</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="cats.html" class="nav-link active">我们的猫</a>
+                <a href="adopt.html" class="nav-link">云养计划</a>
+                <a href="news.html" class="nav-link">动态公告</a>
+                <a href="message.html" class="nav-link">留言板</a>
+                <a href="about.html" class="nav-link">关于我们</a>
+            </div>
+            <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
 
-/* ── 字体（使用系统字体，无需网络加载）── */
+    <div class="page-header">
+        <h1>认识我们的猫</h1>
+        <p>每一只都有自己的故事，等待被你看见</p>
+    </div>
 
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">猫咪成员档案</h2>
+                <span class="see-all">共 <span id="catCount">0</span> 只小伙伴</span>
+            </div>
+            
+            <div class="cats-grid" id="catsContainer">
+                <div class="empty-tip">正在召唤小猫咪们...</div>
+            </div>
+        </div>
+    </section>
 
-/* ── CSS 变量（颜色主题） ── */
-:root {
-  --cream:        #FAF7F2;
-  --cream-dark:   #F0EAE0;
-  --cream-border: #DDD0BB;
-  --brown-light:  #C8A97E;
-  --brown-mid:    #A07040;
-  --brown-dark:   #5C4A2A;
-  --brown-deep:   #3A2A10;
-  --text-main:    #3A2A10;
-  --text-muted:   #8A7050;
-  --text-hint:    #B0986A;
-  --white:        #FFFFFF;
-  --green-soft:   #D4E8C2;
-  --blue-soft:    #C2D8E8;
-  --amber-soft:   #F5DCA0;
-  --radius-sm:    8px;
-  --radius-md:    14px;
-  --radius-lg:    20px;
-  --radius-xl:    28px;
-  --shadow-soft:  0 4px 24px rgba(90,60,20,0.08);
-  --shadow-card:  0 2px 12px rgba(90,60,20,0.10);
-  --transition:   0.25s ease;
-}
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <span class="logo-text">PawAlliance</span>
+                <p>以商养善 · 让爱延续</p>
+            </div>
+            <p class="footer-copy">© 2026 PawAlliance</p>
+        </div>
+    </footer>
 
-/* ── Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-  background: var(--cream);
-  color: var(--text-main);
-  font-size: 16px;
-  line-height: 1.75;
-}
-img { max-width: 100%; display: block; }
-a { text-decoration: none; color: inherit; }
+    <script>
+        const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-/* ── 容器 ── */
-.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+        async function loadCatsFromSupabase() {
+            const container = document.getElementById('catsContainer');
+            const countDisplay = document.getElementById('catCount');
 
-/* ── 导航栏 ── */
-.navbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(250,247,242,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--cream-border);
-  transition: box-shadow var(--transition);
-}
-.navbar.scrolled { box-shadow: var(--shadow-soft); }
-.nav-inner {
-  max-width: 1100px; margin: 0 auto; padding: 0 2rem;
-  height: 62px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo {
-  display: flex; align-items: center; gap: 10px;
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-}
-.logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-.logo-fallback {
-  display: none; width: 36px; height: 36px; border-radius: 50%;
-  background: var(--brown-light); align-items: center; justify-content: center;
-  font-size: 18px;
-}
-.logo-text { font-size: 17px; font-weight: 600; color: var(--brown-dark); letter-spacing: 0.02em; }
-.nav-links { display: flex; gap: 4px; }
-.nav-link {
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 14px; color: var(--text-muted);
-  transition: all var(--transition);
-}
-.nav-link:hover, .nav-link.active {
-  background: var(--cream-dark); color: var(--brown-dark);
-}
-.nav-toggle {
-  display: none; flex-direction: column; gap: 5px;
-  background: none; border: none; cursor: pointer; padding: 4px;
-}
-.nav-toggle span {
-  display: block; width: 22px; height: 2px;
-  background: var(--brown-dark); border-radius: 2px;
-  transition: all var(--transition);
-}
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`
+                    }
+                });
 
-/* ── 按钮 ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 11px 28px; border-radius: 30px;
-  font-size: 15px; font-weight: 500;
-  cursor: pointer; transition: all var(--transition);
-  border: 1.5px solid transparent;
-}
-.btn-primary {
-  background: var(--brown-light); color: var(--brown-deep);
-  border-color: var(--brown-light);
-}
-.btn-primary:hover { background: var(--brown-mid); border-color: var(--brown-mid); color: var(--white); }
-.btn-outline {
-  background: transparent; color: var(--brown-mid);
-  border-color: var(--brown-light);
-}
-.btn-outline:hover { background: var(--cream-dark); }
-.btn-sm { padding: 7px 18px; font-size: 13px; }
+                const cats = await response.json();
+                if (countDisplay) countDisplay.innerText = cats.length;
 
-/* ── Hero ── */
-.hero {
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 6rem 2rem 4rem;
-  max-width: 1100px; margin: 0 auto;
-  gap: 3rem;
-}
-.hero-content { flex: 1; max-width: 520px; }
-.hero-tag {
-  display: inline-block; margin-bottom: 1.2rem;
-  background: var(--cream-dark); color: var(--brown-mid);
-  padding: 5px 16px; border-radius: 20px;
-  font-size: 13px; letter-spacing: 0.05em;
-}
-.hero-title {
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  font-weight: 600; line-height: 1.3;
-  color: var(--brown-deep);
-  margin-bottom: 1.2rem;
-}
-.hero-sub {
-  font-size: 15px; color: var(--text-muted); line-height: 1.9;
-  margin-bottom: 2rem;
-}
-.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-visual { flex-shrink: 0; }
-.hero-cat-card {
-  width: 280px;
-  background: var(--white); border-radius: var(--radius-xl);
-  border: 1px solid var(--cream-border);
-  overflow: hidden; box-shadow: var(--shadow-soft);
-  animation: floatUp 3s ease-in-out infinite alternate;
-}
-@keyframes floatUp {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-12px); }
-}
-.hero-cat-img { width: 100%; height: 260px; object-fit: cover; }
-.hero-cat-emoji {
-  width: 100%; height: 260px; font-size: 80px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--cream-dark);
-}
-.hero-cat-label {
-  padding: 14px 16px;
-  display: flex; align-items: center; gap: 10px;
-}
-.cat-tag {
-  background: var(--brown-light); color: var(--brown-deep);
-  padding: 3px 10px; border-radius: 10px; font-size: 12px;
-}
-.cat-name-small { font-size: 13px; color: var(--text-muted); }
+                if (!cats || cats.length === 0) {
+                    container.innerHTML = '<div class="empty-tip">档案库暂时是空的 😿</div>';
+                    return;
+                }
 
-/* ── 数据统计 ── */
-.stats-section {
-  background: var(--cream-dark);
-  border-top: 1px solid var(--cream-border);
-  border-bottom: 1px solid var(--cream-border);
-  padding: 2.5rem 0;
-}
-.stats-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
-}
-.stat-item { text-align: center; padding: 1rem; }
-.stat-num {
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-  font-size: 2.5rem; font-weight: 600; color: var(--brown-mid);
-}
-.stat-label { font-size: 13px; color: var(--text-hint); margin-top: 4px; }
+                container.innerHTML = ''; 
+                cats.forEach(cat => {
+                    // 核心匹配：根据你的截图使用 cat.name 和 cat.性格
+                    const catName = cat.name || cat.昵称 || "神秘小伙伴";
+                    const catPhoto = cat.photo_url || 'assets/cats/yitong.png';
+                    const catStatus = cat.status || "在册";
+                    
+                    // 状态颜色逻辑：对应你 CSS 中的 .status-green 等
+                    let statusClass = 'status-amber';
+                    if(catStatus === '已领养') statusClass = 'status-gray';
+                    if(catStatus === '待领养') statusClass = 'status-green';
 
-/* ── 通用 Section ── */
-.section { padding: 5rem 0; }
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 2.5rem;
-}
-.section-title {
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-  font-size: 1.7rem; font-weight: 500; color: var(--brown-deep);
-}
-.see-all { font-size: 14px; color: var(--brown-mid); }
-.see-all:hover { color: var(--brown-dark); }
+                    const card = document.createElement('div');
+                    card.className = 'cat-card'; // 使用你 style.css 的类名
+                    card.innerHTML = `
+                        <div class="cat-card-photo">
+                            <img src="${catPhoto}" class="cat-card-img" alt="${catName}" onerror="this.src='assets/cats/yitong.png'">
+                            <span class="cat-status ${statusClass}">${catStatus}</span>
+                        </div>
+                        <div class="cat-card-info">
+                            <div class="cat-card-header">
+                                <h3 class="cat-card-name">${catName}</h3>
+                                <div class="cat-tags">
+                                    <span class="cat-tag-chip">${cat.性别 || '未知性别'}</span>
+                                    <span class="cat-tag-chip">${cat.年龄 || '未知年龄'}</span>
+                                </div>
+                            </div>
+                            <p class="cat-card-desc">${cat.性格 || '很可爱，暂时还没写简介。'}</p>
+                            <a href="cat-detail.html?id=${cat.id}" class="btn btn-primary btn-sm">了解更多</a>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = '<div class="empty-tip" style="color:red;">召唤失败，请检查网络设置。</div>';
+            }
+        }
 
-/* ── 猫咪卡片 ── */
-.cats-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-.cat-card {
-  background: var(--white); border-radius: var(--radius-lg);
-  border: 1px solid var(--cream-border);
-  overflow: hidden; box-shadow: var(--shadow-card);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-soft); }
-.cat-card-placeholder { opacity: 0.55; }
-.cat-card-photo { position: relative; height: 200px; overflow: hidden; background: var(--cream-dark); }
-.cat-card-img { width: 100%; height: 100%; object-fit: cover; }
-.cat-card-emoji {
-  width: 100%; height: 100%; font-size: 60px;
-  display: flex; align-items: center; justify-content: center;
-}
-.cat-status {
-  position: absolute; top: 12px; right: 12px;
-  padding: 3px 10px; border-radius: 10px; font-size: 12px;
-}
-.status-green  { background: #D4E8C2; color: #3A6020; }
-.status-blue   { background: #C2D8E8; color: #204060; }
-.status-amber  { background: #F5DCA0; color: #7A5010; }
-.status-gray   { background: var(--cream-dark); color: var(--text-muted); }
-.cat-card-info { padding: 1.25rem; }
-.cat-card-header { margin-bottom: 8px; }
-.cat-card-name { font-size: 17px; font-weight: 500; color: var(--brown-dark); margin-bottom: 6px; }
-.cat-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.cat-tag-chip {
-  background: var(--cream-dark); color: var(--text-muted);
-  padding: 2px 9px; border-radius: 8px; font-size: 12px;
-}
-.cat-card-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.7; }
-
-/* ── 云养预览 ── */
-.adopt-preview { background: var(--cream-dark); }
-.adopt-inner {
-  display: flex; align-items: center; gap: 4rem;
-}
-.adopt-text { flex: 1; }
-.adopt-text p { color: var(--text-muted); line-height: 2; }
-.adopt-visual { flex-shrink: 0; text-align: center; }
-.adopt-cat-wrap { position: relative; display: inline-block; }
-.adopt-cat-img { width: 200px; height: 200px; object-fit: cover; border-radius: 50%; border: 3px solid var(--brown-light); }
-.adopt-cat-emoji {
-  width: 200px; height: 200px; font-size: 80px;
-  border-radius: 50%; border: 3px solid var(--brown-light);
-  background: var(--cream); display: none;
-  align-items: center; justify-content: center;
-}
-.adopt-bubble {
-  position: absolute; top: -16px; right: -24px;
-  background: var(--white); color: var(--brown-mid);
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 13px; border: 1px solid var(--cream-border);
-  box-shadow: var(--shadow-card);
-  animation: bounce 2s ease-in-out infinite;
-}
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-
-/* ── 动态列表 ── */
-.news-list { display: flex; flex-direction: column; gap: 1.5rem; }
-.news-item {
-  padding: 1.5rem;
-  background: var(--white); border-radius: var(--radius-md);
-  border: 1px solid var(--cream-border);
-  transition: box-shadow var(--transition);
-}
-.news-item:hover { box-shadow: var(--shadow-card); }
-.news-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.news-type {
-  padding: 3px 10px; border-radius: 8px; font-size: 12px;
-}
-.type-coral  { background: #FAE0D8; color: #9A3820; }
-.type-amber  { background: #F5E0A0; color: #7A5010; }
-.type-green  { background: #D4E8C2; color: #3A6020; }
-.type-teal   { background: #C8E8E0; color: #1A6050; }
-.type-purple { background: #E0D8F5; color: #4A3090; }
-.type-gray   { background: var(--cream-dark); color: var(--text-muted); }
-.news-date { font-size: 13px; color: var(--text-hint); }
-.news-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
-.news-title a:hover { color: var(--brown-mid); }
-.news-summary { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
-.news-read-more { font-size: 13px; color: var(--brown-mid); }
-.empty-tip { color: var(--text-hint); font-size: 14px; text-align: center; padding: 3rem 0; }
-
-/* ── 页面内顶部间距 ── */
-.page-header {
-  padding: 6rem 0 3rem;
-  text-align: center;
-}
-.page-header h1 {
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-  font-size: 2rem; font-weight: 500; color: var(--brown-deep);
-}
-.page-header p { color: var(--text-muted); margin-top: 8px; }
-
-/* ── 留言板 ── */
-.message-wrap { max-width: 700px; margin: 0 auto; }
-.message-form {
-  background: var(--white); border-radius: var(--radius-lg);
-  border: 1px solid var(--cream-border);
-  padding: 2rem; margin-bottom: 2.5rem;
-}
-.message-form h3 { font-size: 16px; font-weight: 500; margin-bottom: 1.2rem; color: var(--brown-dark); }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
-.form-group input, .form-group textarea {
-  width: 100%; padding: 10px 14px;
-  background: var(--cream); border: 1px solid var(--cream-border);
-  border-radius: var(--radius-sm); font-family: inherit; font-size: 14px;
-  color: var(--text-main); transition: border-color var(--transition);
-  resize: vertical;
-}
-.form-group input:focus, .form-group textarea:focus {
-  outline: none; border-color: var(--brown-light);
-}
-.message-list { display: flex; flex-direction: column; gap: 1rem; }
-.message-item {
-  background: var(--white); border-radius: var(--radius-md);
-  border: 1px solid var(--cream-border); padding: 1.25rem;
-}
-.message-author { font-weight: 500; font-size: 14px; color: var(--brown-dark); }
-.message-time { font-size: 12px; color: var(--text-hint); margin-left: 8px; }
-.message-content { font-size: 14px; color: var(--text-muted); margin-top: 8px; line-height: 1.7; }
-.message-reply {
-  background: var(--cream-dark); border-radius: var(--radius-sm);
-  padding: 10px 14px; margin-top: 10px;
-}
-.message-reply-label { font-size: 12px; color: var(--brown-mid); margin-bottom: 4px; }
-.message-reply-content { font-size: 13px; color: var(--text-muted); }
-
-/* ── 云养页面 ── */
-.adopt-page-wrap { max-width: 800px; margin: 0 auto; }
-.adopt-cats-list { display: flex; flex-direction: column; gap: 2rem; }
-.adopt-cat-item {
-  background: var(--white); border-radius: var(--radius-lg);
-  border: 1px solid var(--cream-border); padding: 2rem;
-  display: flex; gap: 2rem; align-items: center;
-}
-.adopt-cat-avatar {
-  width: 120px; height: 120px; flex-shrink: 0;
-  border-radius: 50%; overflow: hidden; border: 3px solid var(--brown-light);
-  display: flex; align-items: center; justify-content: center;
-  background: var(--cream-dark); font-size: 48px;
-}
-.adopt-cat-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.adopt-cat-content { flex: 1; }
-.adopt-cat-content h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; color: var(--brown-dark); }
-.adopt-cat-content p { font-size: 14px; color: var(--text-muted); margin-bottom: 1rem; }
-.feed-count { font-size: 13px; color: var(--text-hint); margin-top: 8px; }
-
-/* ── 关于我们 ── */
-.about-section { max-width: 800px; margin: 0 auto; }
-.about-block { margin-bottom: 3rem; }
-.about-block h2 {
-  font-family: "PingFang SC", "Microsoft YaHei", Georgia, serif;
-  font-size: 1.3rem; font-weight: 500; color: var(--brown-dark);
-  margin-bottom: 1rem; padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--cream-border);
-}
-.about-block p { color: var(--text-muted); line-height: 2; margin-bottom: 1rem; }
-
-/* ✏️ 扩展区块：复制 .about-block 格式，可在 about.html 添加新模块 */
-
-/* ── Footer ── */
-.footer {
-  background: var(--cream-dark); border-top: 1px solid var(--cream-border);
-  padding: 3rem 0 2rem;
-}
-.footer-inner {
-  display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center;
-}
-.footer-brand .logo-text { font-size: 18px; }
-.footer-brand p { font-size: 13px; color: var(--text-hint); margin-top: 4px; }
-.footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-.footer-links a { font-size: 13px; color: var(--text-muted); }
-.footer-links a:hover { color: var(--brown-mid); }
-.footer-copy { font-size: 12px; color: var(--text-hint); }
-
-/* ── 响应式 ── */
-@media (max-width: 768px) {
-  .nav-links { display: none; flex-direction: column; position: absolute; top: 62px; left: 0; right: 0; background: var(--cream); border-bottom: 1px solid var(--cream-border); padding: 1rem; }
-  .nav-links.open { display: flex; }
-  .nav-toggle { display: flex; }
-  .hero { flex-direction: column; padding-top: 5rem; text-align: center; }
-  .hero-btns { justify-content: center; }
-  .hero-visual { order: -1; }
-  .hero-cat-card { width: 220px; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .adopt-inner { flex-direction: column; text-align: center; }
-  .adopt-cat-item { flex-direction: column; text-align: center; }
-}
+        document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
+    </script>
+</body>
+</html>
