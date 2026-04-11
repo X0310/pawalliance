@@ -5,6 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>我们的猫 · PawAlliance</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* 核心样式优化：确保图片比例完美 */
+    .cat-image img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover; /* 自动裁剪，防止拉伸 */
+      display: block;
+    }
+    .cat-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+    .cat-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar" id="navbar">
@@ -21,7 +40,6 @@
         <a href="message.html" class="nav-link">留言板</a>
         <a href="about.html" class="nav-link">关于我们</a>
       </div>
-      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
@@ -30,11 +48,12 @@
     <p>每一只都有自己的故事，等待被你看见</p>
   </div>
 
-  <section class="section" style="padding-top: 1rem;">
+  <section class="section">
     <div class="container">
       <div class="cats-grid" id="catsContainer">
-        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #5C4A2A;">
-            正在召唤小猫咪们...
+        <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
+            <div style="font-size: 40px;">🐱</div>
+            <p style="color: #888;">正在寻找小伙伴...</p>
         </div>
       </div>
     </div>
@@ -47,63 +66,49 @@
     </div>
   </footer>
 
-  <script src="main.js"></script>
   <script>
     const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-    async function loadCatsFromSupabase() {
-        const container = document.getElementById('catsContainer');
-        if (!container) return;
+    async function loadCats() {
+      const container = document.getElementById('catsContainer');
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
+          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+        });
+        const cats = await response.json();
 
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`
-                }
-            });
-
-            const cats = await response.json();
-
-            // 调试用：如果还是没显示，请按 F12 看看 Console 里打印出来的到底是什么
-            console.log("数据库返回的原始数据:", cats);
-
-            if (!cats || cats.length === 0) {
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">数据库里没有数据。</div>';
-                return;
-            }
-
-            container.innerHTML = ''; 
-            cats.forEach(cat => {
-                // 【双保险逻辑】：优先找 name，找不到找 NAME，再找不到找 昵称
-                const catName = cat.name || cat.NAME || cat.昵称 || "无名小猫";
-                const catPhoto = cat.photo_url || cat.PHOTO_URL || 'assets/cats/yitong.png';
-                const catStatus = cat.status || cat.STATUS || '在册';
-                const catInfo = cat.性格 || cat.character || '暂无描述';
-
-                const card = document.createElement('div');
-                card.className = 'cat-card';
-                card.innerHTML = `
-                    <div class="cat-image">
-                        <img src="${catPhoto}" alt="${catName}" onerror="this.src='assets/cats/yitong.png'">
-                        <span class="cat-status">${catStatus}</span>
-                    </div>
-                    <div class="cat-info">
-                        <h3>${catName}</h3>
-                        <p>${catInfo}</p>
-                        <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        } catch (error) {
-            console.error("加载出错:", error);
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red; padding: 50px;">加载出错，请检查配置。</div>';
+        if (!cats || cats.length === 0) {
+          container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">暂无猫咪数据</p>';
+          return;
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
+        container.innerHTML = ''; 
+        cats.forEach(cat => {
+          // 适配你的数据库字段名：使用 cat.name
+          const name = cat.name || "神秘小猫";
+          const photo = cat.photo_url || 'assets/cats/yitong.png';
+          
+          const card = document.createElement('div');
+          card.className = 'cat-card';
+          card.innerHTML = `
+            <div class="cat-image">
+              <img src="${photo}" alt="${name}" onerror="this.src='assets/cats/yitong.png'">
+              <span class="cat-status">${cat.status || '在册'}</span>
+            </div>
+            <div class="cat-info" style="padding: 1.5rem;">
+              <h3 style="margin-bottom: 0.5rem; color: #5C4A2A;">${name}</h3>
+              <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; height: 3em; overflow: hidden;">${cat.性格 || '很可爱，暂无详细性格描述~'}</p>
+              <a href="cat-detail.html?id=${cat.id}" class="btn-sm" style="display: inline-block; background: #FF9D00; color: #fff; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.85rem;">了解更多</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (e) {
+        container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:red;">连接数据库失败</p>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadCats);
   </script>
 </body>
 </html>
