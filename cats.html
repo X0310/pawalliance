@@ -32,8 +32,10 @@
 
   <section class="section" style="padding-top: 1rem;">
     <div class="container">
-      <div class="cats-grid" id="allCats">
-        <!-- 由 cats-data.js 自动生成 -->
+      <div class="cats-grid" id="catsContainer">
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #5C4A2A;">
+            正在召唤小猫咪们...
+        </div>
       </div>
     </div>
   </section>
@@ -45,60 +47,58 @@
     </div>
   </footer>
 
-<script>
-        // Supabase 配置信息
-        const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
+  <script src="main.js"></script>
+  <script>
+    // Supabase 配置信息
+    const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-        async function loadCatsFromSupabase() {
-            const container = document.getElementById('catsContainer');
-            // 显示加载中状态
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #5C4A2A;">正在召唤小猫咪们...</div>';
-
-            try {
-                // 1. 从 Supabase 获取数据
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
-                    headers: {
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-
-                const cats = await response.json();
-
-                // 2. 如果没数据
-                if (!cats || cats.length === 0) {
-                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #5C4A2A;">目前还没有猫咪档案哦~</div>';
-                    return;
+    async function loadCatsFromSupabase() {
+        const container = document.getElementById('catsContainer');
+        
+        try {
+            // 从 Supabase 获取数据
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${SUPABASE_KEY}`
                 }
+            });
 
-                // 3. 渲染猫咪卡片
-                container.innerHTML = ''; // 清空提示文字
-                cats.forEach(cat => {
-                    const card = document.createElement('div');
-                    card.className = 'cat-card';
-                    card.innerHTML = `
-                        <div class="cat-image">
-                            <img src="${cat.photo_url || 'assets/cats/yitong.png'}" alt="${cat.昵称}">
-                            <span class="cat-status">${cat.status || '在册'}</span>
-                        </div>
-                        <div class="cat-info">
-                            <h3>${cat.昵称}</h3>
-                            <p>${cat.性格 || '这只小猫很神秘，还没有性格描述~'}</p>
-                            <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (error) {
-                console.error('加载失败:', error);
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red; padding: 50px;">加载失败，请检查网络或配置。</div>';
+            const cats = await response.json();
+
+            // 如果没数据
+            if (!cats || cats.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #5C4A2A;">目前数据库里还没有猫咪档案哦~</div>';
+                return;
             }
-        }
 
-        // 页面加载完成后立即执行
-        document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
-    </script>
-  
+            // 渲染猫咪卡片
+            container.innerHTML = ''; 
+            cats.forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'cat-card';
+                card.innerHTML = `
+                    <div class="cat-image">
+                        <img src="${cat.photo_url || 'assets/cats/yitong.png'}" alt="${cat.昵称}" onerror="this.src='assets/cats/yitong.png'">
+                        <span class="cat-status">${cat.status || '在册'}</span>
+                    </div>
+                    <div class="cat-info">
+                        <h3>${cat.昵称}</h3>
+                        <p>${cat.性格 || '这只小猫很神秘，还没有性格描述~'}</p>
+                        <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } catch (error) {
+            console.error('加载失败:', error);
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red; padding: 50px;">连接数据库失败，请检查网络。</div>';
+        }
+    }
+
+    // 页面加载完成后立即执行
+    document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
+  </script>
 </body>
 </html>
