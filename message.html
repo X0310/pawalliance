@@ -1,150 +1,127 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>留言板 · PawAlliance</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .char-count { font-size: 12px; color: var(--text-hint); text-align: right; margin-top: 4px; }
-    .submit-tip { font-size: 13px; color: var(--text-hint); margin-top: 8px; }
-    .loading { text-align: center; color: var(--text-hint); padding: 2rem; font-size: 14px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板 · PawAlliance</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a href="index.html" class="logo">
-        <div class="logo-fallback" style="display:flex">🐾</div>
-        <span class="logo-text">PawAlliance</span>
-      </a>
-      <div class="nav-links" id="navLinks">
-        <a href="index.html" class="nav-link">首页</a>
-        <a href="cats.html" class="nav-link">我们的猫</a>
-        <a href="adopt.html" class="nav-link">云养计划</a>
-        <a href="news.html" class="nav-link">动态公告</a>
-        <a href="message.html" class="nav-link active">留言板</a>
-        <a href="about.html" class="nav-link">关于我们</a>
-      </div>
-      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
-    </div>
-  </nav>
-
-  <div class="page-header">
-    <h1>留言板</h1>
-    <p>留下你的想法，我们认真阅读每一条留言</p>
-  </div>
-
-  <section class="section" style="padding-top: 1rem;">
-    <div class="container">
-      <div class="message-wrap">
-        <div class="message-form">
-          <h3>发表留言</h3>
-          <div class="form-group">
-            <label>昵称</label>
-            <input type="text" id="msgName" placeholder="你的昵称" maxlength="20" />
-          </div>
-          <div class="form-group">
-            <label>留言内容</label>
-            <textarea id="msgContent" rows="4" placeholder="写下你想说的话…" maxlength="300"></textarea>
-            <div class="char-count"><span id="charCount">0</span> / 300</div>
-          </div>
-          <button class="btn btn-primary" onclick="submitMessage()">提交留言</button>
-          <p class="submit-tip">留言提交后即时显示，感谢你的参与 🐾</p>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">🐾 <span class="logo-text">PawAlliance</span></a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="cats.html" class="nav-link">我们的猫</a>
+                <a href="message.html" class="nav-link active">留言板</a>
+            </div>
         </div>
-        <div class="message-list" id="messageList">
-          <p class="loading">加载中…</p>
+    </nav>
+
+    <div class="page-header">
+        <h1>猫友圈</h1>
+        <p>分享你与毛孩子的故事</p>
+    </div>
+
+    <section class="section">
+        <div class="container message-wrap">
+            <div class="message-form">
+                <h3>发表动态</h3>
+                <div class="form-group">
+                    <input type="text" id="userName" placeholder="你的昵称">
+                </div>
+                <div class="form-group">
+                    <textarea id="msgContent" rows="3" placeholder="这一刻的想法..."></textarea>
+                </div>
+                <button onclick="postMessage()" class="btn btn-primary">发布</button>
+            </div>
+
+            <div id="momentsList" class="moments-container">
+                <div class="empty-tip">正在加载动态...</div>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <footer class="footer">
-    <div class="container footer-inner">
-      <span class="logo-text">PawAlliance</span>
-      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
-    </div>
-  </footer>
+    <script>
+        const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-  <script src="main.js"></script>
-  <script>
-    const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
+        // 1. 加载留言
+        async function loadMessages() {
+            const list = document.getElementById('momentsList');
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/messages?select=*&order=created_at.desc`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                const msgs = await response.json();
 
-    async function supabaseRequest(method, body = null) {
-      const options = {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY,
-          "Prefer": method === "POST" ? "return=representation" : ""
+                if (!msgs || msgs.length === 0) {
+                    list.innerHTML = '<div class="empty-tip">还没有动态，快来沙发！</div>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                msgs.forEach(m => {
+                    const date = new Date(m.created_at).toLocaleString();
+                    const moment = document.createElement('div');
+                    moment.className = 'moment-item';
+                    moment.innerHTML = `
+                        <div class="moment-avatar">👤</div>
+                        <div class="moment-content">
+                            <div class="moment-author">${m.nickname || '路人甲'}</div>
+                            <div class="moment-text">${m.content}</div>
+                            <div class="moment-footer">
+                                <span>${date}</span>
+                                <div class="moment-actions">评论</div>
+                            </div>
+                            ${m.reply ? `
+                            <div class="moment-replies">
+                                <div class="reply-item">
+                                    <span class="reply-author">管理员回执：</span>
+                                    <span>${m.reply}</span>
+                                </div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(moment);
+                });
+            } catch (e) {
+                list.innerHTML = '<div class="empty-tip">加载失败</div>';
+            }
         }
-      };
-      if (body) options.body = JSON.stringify(body);
-      const url = SUPABASE_URL + "/rest/v1/messages" + (method === "GET" ? "?select=*&order=created_at.desc" : "");
-      const res = await fetch(url, options);
-      return res.json();
-    }
 
-    const msgContent = document.getElementById("msgContent");
-    const charCount = document.getElementById("charCount");
-    if (msgContent) {
-      msgContent.addEventListener("input", () => {
-        charCount.textContent = msgContent.value.length;
-      });
-    }
+        // 2. 发布留言
+        async function postMessage() {
+            const name = document.getElementById('userName').value;
+            const content = document.getElementById('msgContent').value;
 
-    async function loadMessages() {
-      const el = document.getElementById("messageList");
-      try {
-        const messages = await supabaseRequest("GET");
-        if (!messages || messages.length === 0) {
-          el.innerHTML = '<p class="empty-tip">还没有留言，来成为第一位吧～</p>';
-          return;
+            if (!name || !content) {
+                alert("请填写完整信息~");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+                    method: 'POST',
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "return=minimal"
+                    },
+                    body: JSON.stringify({ nickname: name, content: content })
+                });
+
+                if (response.ok) {
+                    document.getElementById('msgContent').value = '';
+                    loadMessages(); // 刷新列表
+                }
+            } catch (e) {
+                alert("发布失败，请检查数据库权限");
+            }
         }
-        el.innerHTML = messages.map(function(msg) {
-          return '<div class="message-item">' +
-            '<div><span class="message-author">' + escapeHtml(msg.name) + '</span>' +
-            '<span class="message-time">' + (msg.created_at ? msg.created_at.slice(0,10) : "") + '</span></div>' +
-            '<div class="message-content">' + escapeHtml(msg.content) + '</div>' +
-            (msg.reply ? '<div class="message-reply"><div class="message-reply-label">🐾 PawAlliance 回复</div><div class="message-reply-content">' + escapeHtml(msg.reply) + '</div></div>' : "") +
-            '</div>';
-        }).join("");
-      } catch(e) {
-        el.innerHTML = '<p class="empty-tip">加载失败，请刷新页面重试 😿</p>';
-      }
-    }
 
-    async function submitMessage() {
-      const name = document.getElementById("msgName").value.trim();
-      const content = document.getElementById("msgContent").value.trim();
-      if (!name) { alert("请填写昵称"); return; }
-      if (!content) { alert("请填写留言内容"); return; }
-      const btn = document.querySelector(".message-form .btn");
-      btn.textContent = "提交中…";
-      btn.disabled = true;
-      try {
-        await supabaseRequest("POST", { name: name, content: content, reply: "" });
-        document.getElementById("msgName").value = "";
-        document.getElementById("msgContent").value = "";
-        charCount.textContent = "0";
-        await loadMessages();
-        alert("留言提交成功！感谢你的支持 🐾");
-      } catch(e) {
-        alert("提交失败，请检查网络后重试 😿");
-      } finally {
-        btn.textContent = "提交留言";
-        btn.disabled = false;
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return "";
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    }
-
-    loadMessages();
-  </script>
+        document.addEventListener('DOMContentLoaded', loadMessages);
+    </script>
 </body>
 </html>
