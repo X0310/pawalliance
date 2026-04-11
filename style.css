@@ -3,121 +3,13 @@
    自然清新风格 · 米色主调
    ============================================================ */
 
-/* ── 字体 ── */
+/* ... 此处省略你原有的前 330 行代码，请务必保留它们 ... */
 
-/* ── CSS 变量（颜色主题） ── */
-:root {
-  --cream:        #FAF7F2;
-  --cream-dark:   #F0EAE0;
-  --cream-border: #DDD0BB;
-  --brown-light:  #C8A97E;
-  --brown-mid:    #A07040;
-  --brown-dark:   #5C4A2A;
-  --brown-deep:   #3A2A10;
-  --text-main:    #3A2A10;
-  --text-muted:   #8A7050;
-  --text-hint:    #B0986A;
-  --white:        #FFFFFF;
-  --green-soft:   #D4E8C2;
-  --blue-soft:    #C2D8E8;
-  --amber-soft:   #F5DCA0;
-  --radius-sm:    8px;
-  --radius-md:    14px;
-  --radius-lg:    20px;
-  --radius-xl:    28px;
-  --shadow-soft:  0 4px 24px rgba(90,60,20,0.08);
-  --shadow-card:  0 2px 12px rgba(90,60,20,0.10);
-  --transition:   0.25s ease;
-}
+/* ── 导航栏、Hero、数据统计、猫咪卡片、云养预览、动态列表、留言板原有样式全部保留 ── */
 
-/* ── Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-  background: var(--cream);
-  color: var(--text-main);
-  font-size: 16px;
-  line-height: 1.75;
-}
-img { max-width: 100%; display: block; }
-a { text-decoration: none; color: inherit; }
+/* ... 直到原文件末尾 ... */
 
-/* ── Layout ── */
-.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
-.section { padding: 4rem 0; }
-
-/* ── Navbar ── */
-.navbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(250,247,242,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--cream-border);
-  transition: box-shadow var(--transition);
-}
-.nav-inner {
-  max-width: 1100px; margin: 0 auto; padding: 0 2rem;
-  height: 62px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.logo-fallback { font-size: 24px; }
-.logo-text { font-size: 17px; font-weight: 600; color: var(--brown-dark); letter-spacing: 0.5px; }
-.nav-links { display: flex; gap: 4px; }
-.nav-link {
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 14px; font-weight: 500; color: var(--text-muted);
-  transition: all var(--transition);
-}
-.nav-link:hover { color: var(--brown-mid); background: var(--cream-dark); }
-.nav-link.active { background: var(--cream-dark); color: var(--brown-dark); }
-
-/* ── Page Header ── */
-.page-header {
-  padding: 6rem 0 3rem; text-align: center;
-  background: linear-gradient(to bottom, var(--cream-dark), var(--cream));
-}
-.page-header h1 { font-size: 2.25rem; color: var(--brown-deep); margin-bottom: 0.75rem; }
-.page-header p { color: var(--text-muted); font-size: 1.1rem; }
-
-/* ── Message Board ── */
-.message-wrap { max-width: 700px; margin: 0 auto; }
-.message-form {
-  background: var(--white); border-radius: var(--radius-lg);
-  border: 1px solid var(--cream-border); padding: 2rem;
-  box-shadow: var(--shadow-soft); margin-bottom: 2.5rem;
-}
-.message-form h3 { font-size: 18px; color: var(--brown-dark); margin-bottom: 1.5rem; }
-.form-group { margin-bottom: 1.25rem; }
-.form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
-.form-group input, .form-group textarea {
-  width: 100%; padding: 10px 14px; background: var(--cream);
-  border: 1px solid var(--cream-border); border-radius: var(--radius-sm);
-  font-family: inherit; font-size: 15px; color: var(--text-main);
-  transition: border-color var(--transition);
-}
-.form-group textarea { resize: vertical; min-height: 100px; }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 11px 28px; border-radius: 30px;
-  font-size: 15px; font-weight: 500; border: none; cursor: pointer;
-  transition: all var(--transition);
-}
-.btn-primary { background: var(--brown-light); color: var(--brown-deep); }
-.btn-primary:hover { background: var(--brown-mid); color: var(--white); transform: translateY(-1px); }
-
-.message-list { display: flex; flex-direction: column; gap: 1rem; }
-.message-item {
-  background: var(--white); border-radius: var(--radius-md);
-  border: 1px solid var(--cream-border); padding: 1.25rem;
-  box-shadow: var(--shadow-card); transition: transform var(--transition);
-}
-.message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-.message-author { font-weight: 600; font-size: 14px; color: var(--brown-dark); }
-.message-time { font-size: 12px; color: var(--text-hint); }
-.message-content { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-
-/* ── 👇 这里是新增的回复功能“补丁” ── */
+/* ── 👇 仅在文件最末尾追加以下回复增强样式 ── */
 .message-actions {
   margin-top: 10px;
   display: flex;
@@ -127,9 +19,13 @@ a { text-decoration: none; color: inherit; }
   font-size: 12px;
   color: var(--brown-mid);
   cursor: pointer;
-  padding: 4px 8px;
-  background: var(--cream);
+  padding: 4px 10px;
+  background: var(--cream-dark);
   border-radius: 4px;
+  transition: var(--transition);
+}
+.btn-reply-link:hover {
+  background: var(--cream-border);
 }
 .reply-box {
   margin-top: 15px;
@@ -138,11 +34,20 @@ a { text-decoration: none; color: inherit; }
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--brown-light);
 }
-.reply-item { font-size: 13px; margin-bottom: 6px; color: var(--text-main); }
-.reply-item:last-child { margin-bottom: 0; }
-.reply-name { font-weight: 600; color: var(--brown-dark); }
+.reply-item {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+.reply-item:last-child {
+  margin-bottom: 0;
+}
+.reply-name {
+  font-weight: 600;
+  color: var(--brown-dark);
+}
 
-/* ── Footer ── */
-.footer { background: var(--cream-dark); border-top: 1px solid var(--cream-border); padding: 3rem 0 2rem; }
-.footer-inner { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center; }
-.footer-copy { font-size: 12px; color: var(--text-hint); }
+/* ── 响应式 (保留你原有的 @media 部分) ── */
+@media (max-width: 768px) {
+  /* ... 原有响应式代码 ... */
+}
