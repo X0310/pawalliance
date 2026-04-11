@@ -1,101 +1,96 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我们的猫 · PawAlliance</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我们的猫 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-inner">
-            <a href="index.html" class="logo">🐾 <span class="logo-text">PawAlliance</span></a>
-            <div class="nav-links">
-                <a href="index.html" class="nav-link">首页</a>
-                <a href="cats.html" class="nav-link active">我们的猫</a>
-                <a href="adopt.html" class="nav-link">云养计划</a>
-                <a href="about.html" class="nav-link">关于我们</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="page-header">
-        <h1>认识我们的猫</h1>
-        <p>每一只都有自己的故事，等待被你看见</p>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link active">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
     </div>
+  </nav>
 
+  <div class="page-header">
+    <h1>认识我们的猫</h1>
+    <p>每一只都有自己的故事，等待被你看见</p>
+  </div>
+
+  <section class="section" style="padding-top: 1rem;">
     <div class="container">
-        <div class="cats-grid" id="catsContainer">
-            <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
-                <div class="loading-spider" style="font-size: 40px; margin-bottom: 20px;">🐱</div>
-                <p style="color: #999; letter-spacing: 2px;">正在调取猫咪档案...</p>
-            </div>
-        </div>
+      <div class="cats-grid" id="allCats">
+        <p class="empty-tip">加载中…</p>
+      </div>
     </div>
+  </section>
 
-    <script>
-        // 核心配置
-        const CONFIG = {
-            url: "https://ecvwyfolfitogyeiywbe.supabase.co",
-            key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs"
-        };
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
 
-        async function initCatsPage() {
-            const container = document.getElementById('catsContainer');
-            
-            try {
-                // 1. 获取数据
-                const response = await fetch(`${CONFIG.url}/rest/v1/cats?select=*&order=created_at.desc`, {
-                    headers: {
-                        "apikey": CONFIG.key,
-                        "Authorization": `Bearer ${CONFIG.key}`
-                    }
-                });
+  <script src="main.js"></script>
+  <script>
+    const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-                if (!response.ok) throw new Error("无法连接到数据库");
-                const cats = await response.json();
+    async function loadCats() {
+      const el = document.getElementById("allCats");
+      try {
+        const res = await fetch(SUPABASE_URL + "/rest/v1/cats?select=*&order=created_at.desc", {
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+        });
+        const cats = await res.json();
 
-                // 2. 空数据处理
-                if (!cats || cats.length === 0) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; padding: 80px;">
-                            <p style="font-size: 1.2rem; color: #666;">😿 档案库暂时是空的</p>
-                        </div>`;
-                    return;
-                }
-
-                // 3. 渲染数据
-                container.innerHTML = ''; // 清除加载提示
-                cats.forEach(cat => {
-                    // 字段容错处理：兼容 name, NAME, 昵称 等
-                    const name = cat.name || cat.NAME || cat.昵称 || "神秘猫咪";
-                    const photo = cat.photo_url || cat.PHOTO_URL || 'assets/cats/default.png';
-                    const status = cat.status || "在册";
-                    const bio = cat.性格 || cat.character || "这只猫咪很神秘，还没写简介。";
-
-                    const card = document.createElement('div');
-                    card.className = 'cat-card';
-                    card.innerHTML = `
-                        <div class="cat-image">
-                            <img src="${photo}" alt="${name}" onerror="this.src='assets/cats/yitong.png'">
-                            <span class="cat-status">${status}</span>
-                        </div>
-                        <div class="cat-info">
-                            <h3>${name}</h3>
-                            <p>${bio}</p>
-                            <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;">加载失败: ${err.message}</div>`;
-            }
+        if (!cats || cats.length === 0) {
+          el.innerHTML = '<p class="empty-tip">暂无猫咪档案～</p>';
+          return;
         }
 
-        document.addEventListener('DOMContentLoaded', initCatsPage);
-    </script>
+        el.innerHTML = cats.map(function(cat) {
+          const statusColor = { "在册": "status-green", "已送养": "status-blue", "医疗中": "status-amber" }[cat.status] || "status-gray";
+          const photoHTML = cat.photo_url
+            ? '<img src="' + cat.photo_url + '" alt="' + (cat.昵称||"") + '" class="cat-card-img" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div class="cat-card-emoji" style="display:none">🐱</div>'
+            : '<div class="cat-card-emoji">🐱</div>';
+          return '<div class="cat-card">' +
+            '<div class="cat-card-photo">' + photoHTML +
+            '<span class="cat-status ' + statusColor + '">' + (cat.status || "在册") + '</span></div>' +
+            '<div class="cat-card-info">' +
+            '<div class="cat-card-header"><h3 class="cat-card-name">' + (cat.昵称 || "未命名") + '</h3></div>' +
+            '<p class="cat-card-desc">' + (cat.性格 || "这只猫咪很神秘～") + '</p>' +
+            '<a href="cat-detail.html?id=' + cat.id + '" class="btn btn-outline btn-sm">查看详情</a>' +
+            '</div></div>';
+        }).join("");
+
+        // 添加"期待下一位"占位卡
+        el.innerHTML += '<div class="cat-card cat-card-placeholder">' +
+          '<div class="cat-card-photo"><div class="cat-card-emoji">🐾</div>' +
+          '<span class="cat-status status-gray">敬请期待</span></div>' +
+          '<div class="cat-card-info"><h3 class="cat-card-name">期待下一位</h3>' +
+          '<p class="cat-card-desc">我们正在等待下一位有缘的小生命……</p></div></div>';
+
+      } catch(e) {
+        el.innerHTML = '<p class="empty-tip">加载失败，请刷新重试 😿</p>';
+      }
+    }
+
+    loadCats();
+  </script>
 </body>
 </html>
