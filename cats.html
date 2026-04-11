@@ -48,9 +48,7 @@
   </footer>
 
   <script src="main.js"></script>
-
   <script>
-    // 1. Supabase 配置
     const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
@@ -59,71 +57,53 @@
         if (!container) return;
 
         try {
-            // 2. 发起数据库查询
             const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
                 headers: {
                     "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`,
-                    "Content-Type": "application/json"
+                    "Authorization": `Bearer ${SUPABASE_KEY}`
                 }
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP 错误! 状态码: ${response.status}`);
-            }
-
             const cats = await response.json();
 
-            // 3. 检查是否有数据
+            // 调试用：如果还是没显示，请按 F12 看看 Console 里打印出来的到底是什么
+            console.log("数据库返回的原始数据:", cats);
+
             if (!cats || cats.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
-                        <p style="font-size: 1.2rem; color: #5C4A2A;">😿 数据库里还没有猫咪记录</p>
-                        <p style="color: #999; margin-top: 10px;">请去管理后台添加猫咪数据</p>
-                    </div>`;
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">数据库里没有数据。</div>';
                 return;
             }
 
-            // 4. 清空容器并循环渲染
             container.innerHTML = ''; 
             cats.forEach(cat => {
+                // 【双保险逻辑】：优先找 name，找不到找 NAME，再找不到找 昵称
+                const catName = cat.name || cat.NAME || cat.昵称 || "无名小猫";
+                const catPhoto = cat.photo_url || cat.PHOTO_URL || 'assets/cats/yitong.png';
+                const catStatus = cat.status || cat.STATUS || '在册';
+                const catInfo = cat.性格 || cat.character || '暂无描述';
+
                 const card = document.createElement('div');
                 card.className = 'cat-card';
-                
-                // 注意：如果你的数据库列名是中文，这里就用 cat.昵称；如果是英文，就改用 cat.name
                 card.innerHTML = `
                     <div class="cat-image">
-                        <img src="${cat.photo_url || 'assets/cats/yitong.png'}" 
-                             alt="${cat.昵称 || '小猫'}" 
-                             onerror="this.src='assets/cats/yitong.png'">
-                        <span class="cat-status">${cat.status || '在册'}</span>
+                        <img src="${catPhoto}" alt="${catName}" onerror="this.src='assets/cats/yitong.png'">
+                        <span class="cat-status">${catStatus}</span>
                     </div>
                     <div class="cat-info">
-                        <h3>${cat.昵称 || '未命名'}</h3>
-                        <p>${cat.性格 || '暂无性格描述'}</p>
+                        <h3>${catName}</h3>
+                        <p>${catInfo}</p>
                         <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
                     </div>
                 `;
                 container.appendChild(card);
             });
-
         } catch (error) {
-            console.error('加载失败:', error);
-            container.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; color: red; padding: 50px;">
-                    <h3>⚠️ 加载失败</h3>
-                    <p>${error.message}</p>
-                    <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">请检查浏览器控制台 (F12) 获取详细信息</p>
-                </div>`;
+            console.error("加载出错:", error);
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red; padding: 50px;">加载出错，请检查配置。</div>';
         }
     }
 
-    // 页面加载完成后立即启动
-    document.onreadystatechange = function () {
-        if (document.readyState === "complete") {
-            loadCatsFromSupabase();
-        }
-    };
+    document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
   </script>
 </body>
 </html>
