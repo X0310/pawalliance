@@ -1,114 +1,101 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>我们的猫 · PawAlliance</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    /* 核心样式优化：确保图片比例完美 */
-    .cat-image img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover; /* 自动裁剪，防止拉伸 */
-      display: block;
-    }
-    .cat-card {
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      transition: transform 0.3s ease;
-    }
-    .cat-card:hover {
-      transform: translateY(-5px);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的猫 · PawAlliance</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a href="index.html" class="logo">
-        <div class="logo-fallback" style="display:flex">🐾</div>
-        <span class="logo-text">PawAlliance</span>
-      </a>
-      <div class="nav-links" id="navLinks">
-        <a href="index.html" class="nav-link">首页</a>
-        <a href="cats.html" class="nav-link active">我们的猫</a>
-        <a href="adopt.html" class="nav-link">云养计划</a>
-        <a href="news.html" class="nav-link">动态公告</a>
-        <a href="message.html" class="nav-link">留言板</a>
-        <a href="about.html" class="nav-link">关于我们</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="page-header">
-    <h1>认识我们的猫</h1>
-    <p>每一只都有自己的故事，等待被你看见</p>
-  </div>
-
-  <section class="section">
-    <div class="container">
-      <div class="cats-grid" id="catsContainer">
-        <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
-            <div style="font-size: 40px;">🐱</div>
-            <p style="color: #888;">正在寻找小伙伴...</p>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">🐾 <span class="logo-text">PawAlliance</span></a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">首页</a>
+                <a href="cats.html" class="nav-link active">我们的猫</a>
+                <a href="adopt.html" class="nav-link">云养计划</a>
+                <a href="about.html" class="nav-link">关于我们</a>
+            </div>
         </div>
-      </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>认识我们的猫</h1>
+        <p>每一只都有自己的故事，等待被你看见</p>
     </div>
-  </section>
 
-  <footer class="footer">
-    <div class="container footer-inner">
-      <span class="logo-text">PawAlliance</span>
-      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    <div class="container">
+        <div class="cats-grid" id="catsContainer">
+            <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
+                <div class="loading-spider" style="font-size: 40px; margin-bottom: 20px;">🐱</div>
+                <p style="color: #999; letter-spacing: 2px;">正在调取猫咪档案...</p>
+            </div>
+        </div>
     </div>
-  </footer>
 
-  <script>
-    const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
+    <script>
+        // 核心配置
+        const CONFIG = {
+            url: "https://ecvwyfolfitogyeiywbe.supabase.co",
+            key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs"
+        };
 
-    async function loadCats() {
-      const container = document.getElementById('catsContainer');
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?select=*&order=created_at.desc`, {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-        });
-        const cats = await response.json();
+        async function initCatsPage() {
+            const container = document.getElementById('catsContainer');
+            
+            try {
+                // 1. 获取数据
+                const response = await fetch(`${CONFIG.url}/rest/v1/cats?select=*&order=created_at.desc`, {
+                    headers: {
+                        "apikey": CONFIG.key,
+                        "Authorization": `Bearer ${CONFIG.key}`
+                    }
+                });
 
-        if (!cats || cats.length === 0) {
-          container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">暂无猫咪数据</p>';
-          return;
+                if (!response.ok) throw new Error("无法连接到数据库");
+                const cats = await response.json();
+
+                // 2. 空数据处理
+                if (!cats || cats.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 80px;">
+                            <p style="font-size: 1.2rem; color: #666;">😿 档案库暂时是空的</p>
+                        </div>`;
+                    return;
+                }
+
+                // 3. 渲染数据
+                container.innerHTML = ''; // 清除加载提示
+                cats.forEach(cat => {
+                    // 字段容错处理：兼容 name, NAME, 昵称 等
+                    const name = cat.name || cat.NAME || cat.昵称 || "神秘猫咪";
+                    const photo = cat.photo_url || cat.PHOTO_URL || 'assets/cats/default.png';
+                    const status = cat.status || "在册";
+                    const bio = cat.性格 || cat.character || "这只猫咪很神秘，还没写简介。";
+
+                    const card = document.createElement('div');
+                    card.className = 'cat-card';
+                    card.innerHTML = `
+                        <div class="cat-image">
+                            <img src="${photo}" alt="${name}" onerror="this.src='assets/cats/yitong.png'">
+                            <span class="cat-status">${status}</span>
+                        </div>
+                        <div class="cat-info">
+                            <h3>${name}</h3>
+                            <p>${bio}</p>
+                            <a href="cat-detail.html?id=${cat.id}" class="btn-sm">了解更多</a>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;">加载失败: ${err.message}</div>`;
+            }
         }
 
-        container.innerHTML = ''; 
-        cats.forEach(cat => {
-          // 适配你的数据库字段名：使用 cat.name
-          const name = cat.name || "神秘小猫";
-          const photo = cat.photo_url || 'assets/cats/yitong.png';
-          
-          const card = document.createElement('div');
-          card.className = 'cat-card';
-          card.innerHTML = `
-            <div class="cat-image">
-              <img src="${photo}" alt="${name}" onerror="this.src='assets/cats/yitong.png'">
-              <span class="cat-status">${cat.status || '在册'}</span>
-            </div>
-            <div class="cat-info" style="padding: 1.5rem;">
-              <h3 style="margin-bottom: 0.5rem; color: #5C4A2A;">${name}</h3>
-              <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem; height: 3em; overflow: hidden;">${cat.性格 || '很可爱，暂无详细性格描述~'}</p>
-              <a href="cat-detail.html?id=${cat.id}" class="btn-sm" style="display: inline-block; background: #FF9D00; color: #fff; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.85rem;">了解更多</a>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (e) {
-        container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:red;">连接数据库失败</p>';
-      }
-    }
-    document.addEventListener('DOMContentLoaded', loadCats);
-  </script>
+        document.addEventListener('DOMContentLoaded', initCatsPage);
+    </script>
 </body>
 </html>
