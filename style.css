@@ -114,6 +114,94 @@
                 container.innerHTML = '<div class="empty-tip" style="color:red;">召唤失败，请检查网络设置。</div>';
             }
         }
+/* ── 留言板盖楼回复样式 ── */
+.message-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.5rem; 
+    margin-top: 2rem;
+}
+
+.message-item {
+    background: var(--white); 
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cream-border); 
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.message-author { 
+    font-weight: 600; 
+    font-size: 15px; 
+    color: var(--brown-dark); 
+}
+
+.message-time { 
+    font-size: 12px; 
+    color: var(--text-hint); 
+}
+
+.message-content { 
+    font-size: 14px; 
+    color: var(--text-main); 
+    line-height: 1.6; 
+    white-space: pre-wrap;
+}
+
+/* 回复按钮样式 */
+.message-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-reply {
+    font-size: 12px;
+    color: var(--brown-mid);
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--cream);
+    transition: var(--transition);
+}
+
+.btn-reply:hover {
+    background: var(--cream-dark);
+}
+
+/* 子回复区域（楼中楼） */
+.reply-box {
+    margin-top: 15px;
+    padding: 12px;
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--brown-light);
+}
+
+.reply-item {
+    font-size: 13px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--cream-border);
+}
+
+.reply-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.reply-name {
+    font-weight: 600;
+    color: var(--brown-mid);
+}
 
         document.addEventListener('DOMContentLoaded', loadCatsFromSupabase);
     </script>
