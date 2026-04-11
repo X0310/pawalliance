@@ -5,151 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>猫咪详情 · PawAlliance</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .cat-detail-wrap { max-width: 760px; margin: 0 auto; }
-    .cat-detail-card {
-      background: var(--white); border-radius: var(--radius-xl);
-      border: 1px solid var(--cream-border); overflow: hidden;
-      box-shadow: var(--shadow-soft);
-    }
-    .cat-detail-photo {
-      width: 100%; height: 360px;
-      background: var(--cream-dark);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .cat-detail-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .cat-detail-photo-emoji { font-size: 80px; }
-    .cat-detail-body { padding: 2rem; }
-    .cat-detail-name { font-family: 'Noto Serif SC', serif; font-size: 2rem; font-weight: 500; color: var(--brown-deep); margin-bottom: 0.5rem; }
-    .cat-detail-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .cat-meta-item { font-size: 13px; background: var(--cream-dark); color: var(--text-muted); padding: 4px 12px; border-radius: 10px; }
-    .cat-detail-story { font-size: 15px; color: var(--text-muted); line-height: 2; margin-bottom: 2rem; }
-    .cat-detail-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-  </style>
 </head>
 <body>
-  <nav class="navbar" id="navbar">
+  <nav class="navbar">
     <div class="nav-inner">
-      <a href="index.html" class="logo">
-        <div class="logo-fallback" style="display:flex">🐾</div>
-        <span class="logo-text">PawAlliance</span>
-      </a>
-      <div class="nav-links" id="navLinks">
-        <a href="index.html" class="nav-link">首页</a>
-        <a href="cats.html" class="nav-link">我们的猫</a>
-        <a href="adopt.html" class="nav-link">云养计划</a>
-        <a href="news.html" class="nav-link">动态公告</a>
-        <a href="message.html" class="nav-link">留言板</a>
-        <a href="about.html" class="nav-link">关于我们</a>
-      </div>
-      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo">🐾 <span class="logo-text">PawAlliance</span></a>
     </div>
   </nav>
 
-  <div class="page-header">
-    <h1 id="pageTitle">猫咪详情</h1>
-    <p><a href="cats.html" style="color:var(--brown-mid)">← 返回全部猫咪</a></p>
-  </div>
-
-  <section class="section" style="padding-top: 1rem;">
+  <section class="section">
     <div class="container">
-      <div class="cat-detail-wrap">
-        <div class="cat-detail-card" id="catDetailCard">
-          <p class="empty-tip" style="padding:3rem">加载中…</p>
-        </div>
+      <div id="catDetailCard" class="cat-detail-card" style="background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <div style="text-align: center; padding: 100px 0;">加载中...</div>
       </div>
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="container footer-inner">
-      <span class="logo-text">PawAlliance</span>
-      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
-    </div>
-  </footer>
-
-<script src="main.js"></script>
-
   <script>
-    // Supabase 配置
     const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-    const params = new URLSearchParams(location.search);
-    const catId = params.get("id");
-    const card = document.getElementById("catDetailCard");
+    async function fetchDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const catId = params.get('id');
+      const card = document.getElementById('catDetailCard');
 
-    async function fetchCatDetail() {
       if (!catId) {
-        card.innerHTML = `<p class="empty-tip" style="padding:3rem">未指定猫咪 ID 😿</p>`;
+        card.innerHTML = '<div style="padding:50px; text-align:center;">未找到猫咪 ID</div>';
         return;
       }
 
       try {
-        // 从数据库根据 ID 查询单只猫咪
         const response = await fetch(`${SUPABASE_URL}/rest/v1/cats?id=eq.${catId}&select=*`, {
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-          }
+          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
         });
         const data = await response.json();
-        const cat = data[0]; // 获取查询到的第一条记录
-
-        if (!cat) {
-          card.innerHTML = `<p class="empty-tip" style="padding:3rem">找不到这只猫咪的信息 😿</p>`;
+        
+        if (!data || data.length === 0) {
+          card.innerHTML = '<div style="padding:50px; text-align:center;">猫咪不存在</div>';
           return;
         }
 
-        // 更新页面标题
-        document.title = `${cat.昵称} · PawAlliance`;
-        document.getElementById("pageTitle").textContent = cat.昵称;
-
-        // 处理图片 HTML
-        const photoHTML = cat.photo_url
-          ? `<img src="${cat.photo_url}" alt="${cat.昵称}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="cat-detail-photo-emoji" style="display:none">🐱</div>`
-          : `<div class="cat-detail-photo-emoji">🐱</div>`;
-
-        // 填充页面内容（匹配你的数据库字段名）
+        const cat = data[0];
+        // 渲染详细信息（字段名匹配你的数据库：cat.name）
         card.innerHTML = `
-          <div class="cat-detail-photo">${photoHTML}</div>
-          <div class="cat-detail-body">
-            <h1 class="cat-detail-name">${cat.昵称}</h1>
-            <div class="cat-detail-meta">
-              <span class="cat-meta-item">年龄：${cat.年龄 || '未知'}</span>
-              <span class="cat-meta-item">毛色：${cat.毛色 || '未知'}</span>
-              <span class="cat-meta-item">性别：${cat.性别 || '未知'}</span>
-              <span class="cat-meta-item">状态：${cat.status || '在册'}</span>
-              <span class="cat-meta-item">发现地点：${cat.发现地点 || '未知'}</span>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+              <img src="${cat.photo_url || 'assets/cats/yitong.png'}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-            <div class="cat-tags" style="margin-bottom:1.5rem">
-              <span class="cat-tag-chip">${cat.性格 || '温顺'}</span>
-              <span class="cat-tag-chip">${cat.体型 || '标准'}</span>
-              <span class="cat-tag-chip">${cat.绝育信息 || '未知'}</span>
-            </div>
-            <div class="cat-detail-story">
-                <strong>救助故事：</strong><br>
-                ${cat.救助过程记录 || '这段故事还在编写中...'}
-                <br><br>
-                <strong>健康档案：</strong><br>
-                ${cat.健康状况总结 || '暂无说明'}
-            </div>
-            <div class="cat-detail-actions">
-              <a href="adopt.html" class="btn btn-primary">云养 ${cat.昵称}</a>
-              <a href="cats.html" class="btn btn-outline">返回猫咪列表</a>
+            <div style="flex: 1; min-width: 300px; padding: 40px;">
+              <h1 style="color: #5C4A2A; margin-bottom: 10px;">${cat.name}</h1>
+              <p style="background: #FFF4E6; display: inline-block; padding: 4px 12px; border-radius: 4px; color: #FF9D00; font-weight: bold; margin-bottom: 20px;">${cat.status || '在册'}</p>
+              
+              <div style="margin-bottom: 30px; line-height: 1.8; color: #666;">
+                <p><strong>年龄：</strong>${cat.年龄 || '未知'}</p>
+                <p><strong>性别：</strong>${cat.性别 || '未知'}</p>
+                <p><strong>毛色：</strong>${cat.毛色 || '未知'}</p>
+                <p><strong>性格：</strong>${cat.性格 || '暂无描述'}</p>
+                <p><strong>发现地点：</strong>${cat.发现地点 || '暂无记录'}</p>
+              </div>
+
+              <div style="border-top: 1px solid #eee; pt: 20px;">
+                <h3 style="margin-bottom: 10px; color: #5C4A2A;">领养/救助故事</h3>
+                <p style="color: #888; line-height: 1.6;">${cat.故事 || '这只小猫的故事正在整理中...'}</p>
+              </div>
+
+              <div style="margin-top: 40px;">
+                <a href="adopt.html" style="background: #FF9D00; color: #fff; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold;">立即咨询领养</a>
+                <a href="cats.html" style="margin-left: 15px; color: #999; text-decoration: none;">返回列表</a>
+              </div>
             </div>
           </div>
         `;
-      } catch (error) {
-        console.error("加载详情失败:", error);
-        card.innerHTML = `<p class="empty-tip" style="padding:3rem">数据加载出错，请稍后再试。</p>`;
+      } catch (e) {
+        card.innerHTML = '<div style="padding:50px; text-align:center;">详情加载失败</div>';
       }
     }
-
-    // 执行加载
-    fetchCatDetail();
+    fetchDetail();
   </script>
-  
 </body>
 </html>
