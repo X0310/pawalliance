@@ -6,9 +6,54 @@
   <title>留言板 · PawAlliance</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    .msg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .msg-count { font-size: 13px; color: var(--text-hint); background: var(--cream-dark); padding: 4px 12px; border-radius: 20px; }
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--brown-dark); color: #fff; padding: 12px 28px; border-radius: 30px; font-size: 14px; opacity: 0; transition: all 0.3s ease; z-index: 999; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .message-item { background: var(--white); border-radius: var(--radius-md); border: 1px solid var(--cream-border); padding: 1.25rem; margin-bottom: 1rem; transition: box-shadow 0.2s; }
+    .message-item:hover { box-shadow: var(--shadow-card); }
+    .message-author { font-weight: 500; font-size: 14px; color: var(--brown-dark); }
+    .message-time { font-size: 12px; color: var(--text-hint); margin-left: 8px; }
+    .message-content { font-size: 14px; color: var(--text-muted); margin: 8px 0 12px; line-height: 1.8; }
+    .msg-actions { display: flex; align-items: center; gap: 12px; }
+    .like-btn { display: flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--cream-border); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 13px; color: var(--text-muted); transition: all 0.2s; }
+    .like-btn:hover { border-color: var(--brown-light); color: var(--brown-mid); }
+    .like-btn.liked { background: #FFF0E0; border-color: var(--brown-light); color: var(--brown-mid); }
+    .reply-toggle-btn { background: none; border: none; cursor: pointer; font-size: 13px; color: var(--text-muted); padding: 4px 8px; transition: color 0.2s; }
+    .reply-toggle-btn:hover { color: var(--brown-mid); }
+    .admin-reply { background: var(--cream-dark); border-radius: var(--radius-sm); border-left: 3px solid var(--brown-light); padding: 10px 14px; margin: 10px 0; }
+    .admin-reply-label { font-size: 12px; color: var(--brown-mid); font-weight: 500; margin-bottom: 4px; }
+    .admin-reply-content { font-size: 13px; color: var(--text-muted); }
+    .replies-wrap { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--cream-border); }
+    .reply-item { display: flex; gap: 10px; margin-bottom: 10px; }
+    .reply-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--brown-mid); font-weight: 500; }
+    .reply-body { flex: 1; }
+    .reply-name { font-size: 13px; font-weight: 500; color: var(--brown-dark); }
+    .reply-at { font-size: 12px; color: var(--brown-light); margin: 0 4px; }
+    .reply-time { font-size: 11px; color: var(--text-hint); margin-left: 6px; }
+    .reply-text { font-size: 13px; color: var(--text-muted); margin: 4px 0 6px; line-height: 1.7; }
+    .reply-actions { display: flex; gap: 10px; align-items: center; }
+    .reply-like-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--text-hint); padding: 2px 6px; border-radius: 10px; transition: all 0.2s; }
+    .reply-like-btn:hover, .reply-like-btn.liked { color: var(--brown-mid); }
+    .reply-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: var(--text-hint); padding: 2px 6px; transition: color 0.2s; }
+    .reply-btn:hover { color: var(--brown-mid); }
+    .sub-replies { margin-left: 38px; margin-top: 6px; }
+    .sub-reply-item { display: flex; gap: 8px; margin-bottom: 8px; padding: 8px 10px; background: var(--cream); border-radius: var(--radius-sm); }
+    .sub-reply-avatar { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--brown-mid); }
+    .reply-form { display: none; margin-top: 10px; margin-left: 38px; }
+    .reply-form.show { display: flex; gap: 8px; flex-wrap: wrap; }
+    .reply-form input { flex: 1; min-width: 80px; padding: 8px 12px; background: var(--cream); border: 1px solid var(--cream-border); border-radius: 20px; font-size: 13px; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+    .reply-form input:focus { border-color: var(--brown-light); }
+    .reply-form .reply-name-input { max-width: 90px; flex-shrink: 0; }
+    .reply-submit-btn { background: var(--brown-light); color: var(--brown-deep); border: none; border-radius: 20px; padding: 8px 16px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+    .reply-submit-btn:hover { background: var(--brown-mid); color: white; }
+    .cooldown-tip { font-size: 12px; color: var(--text-hint); margin-top: 6px; display: none; }
+    .skeleton { animation: shimmer 1.5s infinite; }
+    .skeleton-item { background: var(--cream-dark); border-radius: var(--radius-md); height: 100px; margin-bottom: 1rem; }
+    @keyframes shimmer { 0%{opacity:.6} 50%{opacity:1} 100%{opacity:.6} }
     .char-count { font-size: 12px; color: var(--text-hint); text-align: right; margin-top: 4px; }
     .submit-tip { font-size: 13px; color: var(--text-hint); margin-top: 8px; }
-    .loading { text-align: center; color: var(--text-hint); padding: 2rem; font-size: 14px; }
+    .empty-tip { color: var(--text-hint); font-size: 14px; text-align: center; padding: 3rem 0; }
   </style>
 </head>
 <body>
@@ -35,7 +80,7 @@
     <p>留下你的想法，我们认真阅读每一条留言</p>
   </div>
 
-  <section class="section" style="padding-top: 1rem;">
+  <section class="section" style="padding-top:1rem">
     <div class="container">
       <div class="message-wrap">
         <div class="message-form">
@@ -49,15 +94,26 @@
             <textarea id="msgContent" rows="4" placeholder="写下你想说的话…" maxlength="300"></textarea>
             <div class="char-count"><span id="charCount">0</span> / 300</div>
           </div>
-          <button class="btn btn-primary" onclick="submitMessage()">提交留言</button>
-          <p class="submit-tip">留言提交后即时显示，感谢你的参与 🐾</p>
+          <button class="btn btn-primary" id="submitBtn" onclick="submitMessage()">提交留言</button>
+          <p class="submit-tip">感谢你的参与 🐾</p>
+          <p class="cooldown-tip" id="cooldownTip"></p>
         </div>
-        <div class="message-list" id="messageList">
-          <p class="loading">加载中…</p>
+        <div class="msg-header">
+          <span class="section-title" style="font-size:1.2rem">全部留言</span>
+          <span class="msg-count" id="msgCount">加载中…</span>
+        </div>
+        <div id="messageList">
+          <div class="skeleton">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <div class="toast" id="toast"></div>
 
   <footer class="footer">
     <div class="container footer-inner">
@@ -71,75 +127,152 @@
     const SUPABASE_URL = "https://ecvwyfolfitogyeiywbe.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
 
-    const msgContent = document.getElementById("msgContent");
-    const charCount = document.getElementById("charCount");
-    if (msgContent) {
-      msgContent.addEventListener("input", () => {
-        charCount.textContent = msgContent.value.length;
-      });
+    function esc(s){if(!s)return"";return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+    function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+    function getInitial(n){return n?n.charAt(0).toUpperCase():"?";}
+    function timeAgo(d){if(!d)return"";const s=(Date.now()-new Date(d).getTime())/1000;if(s<60)return"刚刚";if(s<3600)return Math.floor(s/60)+"分钟前";if(s<86400)return Math.floor(s/3600)+"小时前";if(s<2592000)return Math.floor(s/86400)+"天前";return d.slice(0,10);}
+    function isLiked(k){return localStorage.getItem("paw_liked_"+k)==="1";}
+    function setLiked(k){localStorage.setItem("paw_liked_"+k,"1");}
+    function canSubmit(){return Date.now()-parseInt(localStorage.getItem("paw_last_submit")||"0")>60000;}
+    function markSubmit(){localStorage.setItem("paw_last_submit",Date.now().toString());}
+
+    async function apiGet(t,q){const r=await fetch(SUPABASE_URL+"/rest/v1/"+t+"?"+q,{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}});return r.json();}
+    async function apiPost(t,b){const r=await fetch(SUPABASE_URL+"/rest/v1/"+t,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=representation"},body:JSON.stringify(b)});return r.json();}
+    async function apiPatch(t,id,b){await fetch(SUPABASE_URL+"/rest/v1/"+t+"?id=eq."+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=minimal"},body:JSON.stringify(b)});}
+
+    function renderSubReplies(replies,parentId){
+      const subs=replies.filter(r=>r.parent_reply_id===parentId);
+      if(!subs.length)return"";
+      return'<div class="sub-replies">'+subs.map(function(r){
+        const liked=isLiked("reply_"+r.id);
+        return'<div class="sub-reply-item" id="sr_'+r.id+'">'+
+          '<div class="sub-reply-avatar">'+getInitial(r.name)+'</div>'+
+          '<div class="reply-body">'+
+          '<span class="reply-name">'+esc(r.name)+'</span>'+
+          '<span class="reply-time">'+timeAgo(r.created_at)+'</span>'+
+          '<div class="reply-text">'+esc(r.content)+'</div>'+
+          '<div class="reply-actions">'+
+          '<button class="reply-like-btn '+(liked?"liked":"") +'" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
+          '</div></div></div>';
+      }).join("")+'</div>';
     }
 
-    async function loadMessages() {
-      const el = document.getElementById("messageList");
-      try {
-        const res = await fetch(SUPABASE_URL + "/rest/v1/messages?select=*&order=created_at.desc", {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
-        });
-        const messages = await res.json();
-        if (!messages || messages.length === 0) {
-          el.innerHTML = '<p class="empty-tip">还没有留言，来成为第一位吧～</p>';
-          return;
-        }
-        el.innerHTML = messages.map(function(msg) {
-          return '<div class="message-item">' +
-            '<div><span class="message-author">' + escapeHtml(msg.name) + '</span>' +
-            '<span class="message-time">' + (msg.created_at ? msg.created_at.slice(0,10) : "") + '</span></div>' +
-            '<div class="message-content">' + escapeHtml(msg.content) + '</div>' +
-            (msg.reply ? '<div class="message-reply"><div class="message-reply-label">🐾 PawAlliance 回复</div><div class="message-reply-content">' + escapeHtml(msg.reply) + '</div></div>' : "") +
-            '</div>';
+    function renderReplies(replies,msgId){
+      const tops=replies.filter(r=>!r.parent_reply_id);
+      if(!tops.length)return"";
+      return'<div class="replies-wrap">'+tops.map(function(r){
+        const liked=isLiked("reply_"+r.id);
+        return'<div class="reply-item" id="r_'+r.id+'">'+
+          '<div class="reply-avatar">'+getInitial(r.name)+'</div>'+
+          '<div class="reply-body">'+
+          '<span class="reply-name">'+esc(r.name)+'</span>'+
+          (r.is_admin?'<span class="reply-at">🐾 官方</span>':'')+
+          '<span class="reply-time">'+timeAgo(r.created_at)+'</span>'+
+          '<div class="reply-text">'+esc(r.content)+'</div>'+
+          '<div class="reply-actions">'+
+          '<button class="reply-like-btn '+(liked?"liked":"") +'" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
+          '<button class="reply-btn" onclick="toggleSubReplyForm(\''+r.id+'\')">回复</button>'+
+          '</div>'+
+          renderSubReplies(replies,r.id)+
+          '<div class="reply-form" id="srf_'+r.id+'">'+
+          '<input class="reply-name-input" type="text" placeholder="昵称" id="srn_'+r.id+'" maxlength="20"/>'+
+          '<input type="text" placeholder="回复 '+esc(r.name)+'…" id="src_'+r.id+'" maxlength="200"/>'+
+          '<button class="reply-submit-btn" onclick="submitSubReply(\''+r.id+'\',\''+msgId+'\')">发送</button>'+
+          '</div></div></div>';
+      }).join("")+'</div>';
+    }
+
+    async function loadMessages(){
+      const el=document.getElementById("messageList");
+      try{
+        const[messages,replies]=await Promise.all([
+          apiGet("messages","select=*&order=created_at.desc"),
+          apiGet("replies","select=*&order=created_at.asc")
+        ]);
+        document.getElementById("msgCount").textContent="共 "+messages.length+" 条留言";
+        if(!messages||messages.length===0){el.innerHTML='<p class="empty-tip">还没有留言，来成为第一位吧～</p>';return;}
+        el.innerHTML=messages.map(function(msg){
+          const liked=isLiked("msg_"+msg.id);
+          const msgReplies=replies.filter(r=>r.message_id===msg.id);
+          const replyCount=msgReplies.length;
+          return'<div class="message-item" id="msg_'+msg.id+'">'+
+            '<div><span class="message-author">'+esc(msg.name)+'</span>'+
+            '<span class="message-time">'+timeAgo(msg.created_at)+'</span></div>'+
+            '<div class="message-content">'+esc(msg.content)+'</div>'+
+            (msg.reply?'<div class="admin-reply"><div class="admin-reply-label">🐾 PawAlliance 回复</div><div class="admin-reply-content">'+esc(msg.reply)+'</div></div>':'')+
+            '<div class="msg-actions">'+
+            '<button class="like-btn '+(liked?"liked":"") +'" onclick="likeMessage(\''+msg.id+'\',this)">👍 '+(msg.likes||0)+'</button>'+
+            '<button class="reply-toggle-btn" onclick="toggleReplyForm(\''+msg.id+'\')">💬 回复'+(replyCount>0?"（"+replyCount+"）":"")+'</button>'+
+            '</div>'+
+            renderReplies(msgReplies,msg.id)+
+            '<div class="reply-form" id="rf_'+msg.id+'">'+
+            '<input class="reply-name-input" type="text" placeholder="昵称" id="rn_'+msg.id+'" maxlength="20"/>'+
+            '<input type="text" placeholder="回复留言…" id="rc_'+msg.id+'" maxlength="200"/>'+
+            '<button class="reply-submit-btn" onclick="submitReply(\''+msg.id+'\')">发送</button>'+
+            '</div></div>';
         }).join("");
-      } catch(e) {
-        el.innerHTML = '<p class="empty-tip">加载失败，请刷新页面重试 😿</p>';
-      }
+      }catch(e){el.innerHTML='<p class="empty-tip">加载失败，请刷新页面重试 😿</p>';}
     }
 
-    async function submitMessage() {
-      const name = document.getElementById("msgName").value.trim();
-      const content = document.getElementById("msgContent").value.trim();
-      if (!name) { alert("请填写昵称"); return; }
-      if (!content) { alert("请填写留言内容"); return; }
-      const btn = document.querySelector(".message-form .btn");
-      btn.textContent = "提交中…";
-      btn.disabled = true;
-      try {
-        await fetch(SUPABASE_URL + "/rest/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_KEY,
-            "Authorization": "Bearer " + SUPABASE_KEY,
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify({ name: name, content: content, reply: "" })
-        });
-        document.getElementById("msgName").value = "";
-        document.getElementById("msgContent").value = "";
-        charCount.textContent = "0";
+    async function submitMessage(){
+      const name=document.getElementById("msgName").value.trim();
+      const content=document.getElementById("msgContent").value.trim();
+      if(!name){showToast("请填写昵称");return;}
+      if(!content){showToast("请填写留言内容");return;}
+      if(!canSubmit()){const t=document.getElementById("cooldownTip");t.style.display="block";t.textContent="请稍等一分钟再提交哦～";return;}
+      const btn=document.getElementById("submitBtn");
+      btn.textContent="提交中…";btn.disabled=true;
+      try{
+        await apiPost("messages",{name,content,reply:"",likes:0});
+        document.getElementById("msgName").value="";
+        document.getElementById("msgContent").value="";
+        document.getElementById("charCount").textContent="0";
+        document.getElementById("cooldownTip").style.display="none";
+        markSubmit();
         await loadMessages();
-        alert("留言提交成功！感谢你的支持 🐾");
-      } catch(e) {
-        alert("提交失败，请检查网络后重试 😿");
-      } finally {
-        btn.textContent = "提交留言";
-        btn.disabled = false;
-      }
+        showToast("留言成功！感谢你的支持 🐾");
+      }catch(e){showToast("提交失败，请检查网络后重试");}
+      finally{btn.textContent="提交留言";btn.disabled=false;}
     }
 
-    function escapeHtml(str) {
-      if (!str) return "";
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    async function likeMessage(id,btn){
+      const key="msg_"+id;
+      if(isLiked(key)){showToast("你已经点过赞啦 🐾");return;}
+      const cur=parseInt(btn.textContent.replace("👍 ",""))||0;
+      setLiked(key);btn.classList.add("liked");btn.textContent="👍 "+(cur+1);
+      await apiPatch("messages",id,{likes:cur+1});
     }
 
+    async function likeReply(id,btn){
+      const key="reply_"+id;
+      if(isLiked(key)){showToast("你已经点过赞啦 🐾");return;}
+      const cur=parseInt(btn.textContent.replace("👍 ",""))||0;
+      setLiked(key);btn.classList.add("liked");btn.textContent="👍 "+(cur+1);
+      await apiPatch("replies",id,{likes:cur+1});
+    }
+
+    function toggleReplyForm(msgId){const f=document.getElementById("rf_"+msgId);f.classList.toggle("show");if(f.classList.contains("show"))document.getElementById("rn_"+msgId).focus();}
+    function toggleSubReplyForm(replyId){const f=document.getElementById("srf_"+replyId);f.classList.toggle("show");if(f.classList.contains("show"))document.getElementById("srn_"+replyId).focus();}
+
+    async function submitReply(msgId){
+      const name=document.getElementById("rn_"+msgId).value.trim();
+      const content=document.getElementById("rc_"+msgId).value.trim();
+      if(!name){showToast("请填写昵称");return;}
+      if(!content){showToast("请填写回复内容");return;}
+      try{await apiPost("replies",{message_id:msgId,parent_reply_id:null,name,content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      catch(e){showToast("回复失败，请重试");}
+    }
+
+    async function submitSubReply(parentReplyId,msgId){
+      const name=document.getElementById("srn_"+parentReplyId).value.trim();
+      const content=document.getElementById("src_"+parentReplyId).value.trim();
+      if(!name){showToast("请填写昵称");return;}
+      if(!content){showToast("请填写回复内容");return;}
+      try{await apiPost("replies",{message_id:msgId,parent_reply_id:parentReplyId,name,content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      catch(e){showToast("回复失败，请重试");}
+    }
+
+    document.getElementById("msgContent").addEventListener("input",function(){document.getElementById("charCount").textContent=this.value.length;});
     loadMessages();
   </script>
 </body>
