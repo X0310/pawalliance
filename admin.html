@@ -122,6 +122,7 @@
       <button class="tab-btn active" onclick="switchTab('cats',this)">猫咪档案</button>
       <button class="tab-btn" onclick="switchTab('messages',this)">留言管理</button>
       <button class="tab-btn" onclick="switchTab('news',this)">动态公告</button>
+      <button class="tab-btn" onclick="switchTab('stats',this)">网站数据</button>
     </div>
 
     <!-- 猫咪 Tab -->
@@ -150,6 +151,40 @@
         <button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ 新增动态</button>
       </div>
       <div id="newsList"><p class="loading">加载中…</p></div>
+    </div>
+
+    <!-- 网站数据 Tab -->
+    <div id="tab-stats" style="display:none">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)">首页统计数字管理</span>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--cream-border);border-radius:var(--radius-xl);padding:2rem;max-width:480px">
+        <p style="font-size:13px;color:var(--text-hint);margin-bottom:1.5rem">修改后点击「保存」，首页数字将立即更新。</p>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+          <div class="form-group">
+            <label>在册猫咪</label>
+            <input type="number" id="st_cats" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>云养用户</label>
+            <input type="number" id="st_cloud" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>成功送养</label>
+            <input type="number" id="st_adopted" min="0" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>参与人员</label>
+            <input type="number" id="st_members" min="0" placeholder="0" />
+          </div>
+        </div>
+        <div style="margin-top:1.5rem;display:flex;gap:12px;align-items:center">
+          <button class="btn btn-primary" onclick="saveStats()">保存数据</button>
+          <span id="statsSaveMsg" style="font-size:13px;color:#3A6020;display:none">已保存 ✓</span>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </div>
@@ -256,9 +291,11 @@
     document.getElementById("tab-cats").style.display=tab==="cats"?"block":"none";
     document.getElementById("tab-messages").style.display=tab==="messages"?"block":"none";
     document.getElementById("tab-news").style.display=tab==="news"?"block":"none";
+    document.getElementById("tab-stats").style.display=tab==="stats"?"block":"none";
     if(tab==="cats")loadCats();
     if(tab==="messages")loadMessages();
     if(tab==="news")loadNewsAdmin();
+    if(tab==="stats")loadStats();
   }
 
   // ── API ──
@@ -499,6 +536,52 @@
     if(ok){await loadNewsAdmin();showToast("已删除「"+title+"」");}
     else showToast("删除失败，请重试");
   }
+
+  // ── 网站数据管理 ──
+  async function loadStats(){
+    try{
+      const rows=await apiGet("site_stats","select=*&limit=1");
+      if(!rows||!rows.length){
+        // 如果表里没有记录，默认全0
+        ["cats","cloud","adopted","members"].forEach(k=>{
+          const el=document.getElementById("st_"+k);
+          if(el)el.value="0";
+        });
+        return;
+      }
+      const d=rows[0];
+      document.getElementById("st_cats").value   = d.cats    ||0;
+      document.getElementById("st_cloud").value  = d.cloud   ||0;
+      document.getElementById("st_adopted").value= d.adopted ||0;
+      document.getElementById("st_members").value= d.members ||0;
+      // 存id备用
+      document.getElementById("st_cats").dataset.rowId = d.id;
+    }catch(e){showToast("加载数据失败");}
+  }
+
+  async function saveStats(){
+    const data={
+      cats:    parseInt(document.getElementById("st_cats").value)    ||0,
+      cloud:   parseInt(document.getElementById("st_cloud").value)   ||0,
+      adopted: parseInt(document.getElementById("st_adopted").value) ||0,
+      members: parseInt(document.getElementById("st_members").value) ||0,
+    };
+    const rowId=document.getElementById("st_cats").dataset.rowId;
+    try{
+      if(rowId){
+        await apiPatch("site_stats",rowId,data);
+      }else{
+        // 第一次使用，插入一条记录
+        const rows=await apiPost("site_stats",data);
+        if(rows&&rows[0]) document.getElementById("st_cats").dataset.rowId=rows[0].id;
+      }
+      const msg=document.getElementById("statsSaveMsg");
+      msg.style.display="inline";
+      setTimeout(()=>{msg.style.display="none";},3000);
+      showToast("数据已保存 ✓");
+    }catch(e){showToast("保存失败，请重试");}
+  }
+
 </script>
 </body>
 </html>
