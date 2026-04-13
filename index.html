@@ -57,23 +57,23 @@
   <!-- 数据统计 -->
   <section class="stats-section">
     <div class="container">
-      <div class="stats-grid">
-        <!-- ✏️ 修改数字：直接修改下面 data-target 的值 -->
+      <div class="stats-grid" id="statsGrid">
+        <!-- 数字由 JS 从 Supabase 动态读取，无需手动修改 -->
         <div class="stat-item">
-          <div class="stat-num" data-target="2">0</div>
+          <div class="stat-num" id="stat-cats">0</div>
           <div class="stat-label">在册猫咪</div>
         </div>
         <div class="stat-item">
-          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-num" id="stat-cloud">0</div>
           <div class="stat-label">云养用户</div>
         </div>
         <div class="stat-item">
-          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-num" id="stat-adopted">0</div>
           <div class="stat-label">成功送养</div>
         </div>
         <div class="stat-item">
-          <div class="stat-num" data-target="0">0</div>
-          <div class="stat-label">救助行动</div>
+          <div class="stat-num" id="stat-members">0</div>
+          <div class="stat-label">参与人员</div>
         </div>
       </div>
     </div>
@@ -164,7 +164,7 @@
         el.innerHTML=news.map(function(n){
           const bg=TYPE_COLORS[n.type]||"#F0EAE0";
           const tc=TYPE_TEXT[n.type]||"#8A7050";
-          return'<div class="news-item" style="cursor:pointer" onclick="location.href='news.html'">'+
+          return'<div class="news-item" style="cursor:pointer" onclick="location.href=\'news.html\'">'+
             '<div class="news-meta">'+
             '<span class="news-type" style="background:'+bg+';color:'+tc+'">'+esc(n.type)+'</span>'+
             '<span class="news-date">'+timeAgo(n.created_at)+'</span>'+
@@ -177,6 +177,39 @@
       }catch(e){el.innerHTML='<p class="empty-tip">加载失败</p>';}
     }
     loadNewsPreview();
+
+    // ── 首页统计数字 - 从 Supabase 读取 ──
+    async function loadStats(){
+      try{
+        const res=await fetch(SUPABASE_URL+"/rest/v1/site_stats?select=*&limit=1",{
+          headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}
+        });
+        const rows=await res.json();
+        if(!rows||!rows.length)return;
+        const d=rows[0];
+        function animateTo(elId,target){
+          const el=document.getElementById(elId);
+          if(!el)return;
+          if(!target){el.textContent="0";return;}
+          let cur=0;
+          const step=Math.ceil(target/40);
+          const t=setInterval(()=>{cur+=step;if(cur>=target){el.textContent=target;clearInterval(t);}else{el.textContent=cur;}},30);
+        }
+        animateTo("stat-cats",   d.cats     ||0);
+        animateTo("stat-cloud",  d.cloud    ||0);
+        animateTo("stat-adopted",d.adopted  ||0);
+        animateTo("stat-members",d.members  ||0);
+      }catch(e){console.log("stats load failed",e);}
+    }
+
+    // 进入视口时触发
+    const _statsEl=document.querySelector(".stats-section");
+    if(_statsEl){
+      const _obs=new IntersectionObserver((entries)=>{
+        if(entries[0].isIntersecting){loadStats();_obs.disconnect();}
+      },{threshold:0.3});
+      _obs.observe(_statsEl);
+    }
   </script>
 </body>
 </html>
