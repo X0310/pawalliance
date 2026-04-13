@@ -142,6 +142,15 @@
       </div>
       <div id="msgList"><p class="loading">加载中…</p></div>
     </div>
+
+    <!-- 动态公告 Tab -->
+    <div id="tab-news" style="display:none">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)" id="newsCount">加载中…</span>
+        <button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ 新增动态</button>
+      </div>
+      <div id="newsList"><p class="loading">加载中…</p></div>
+    </div>
   </div>
 </div>
 
@@ -180,18 +189,7 @@
   </div>
 </div>
 
-    <!-- 动态公告 Tab -->
-    <div id="tab-news" style="display:none">
-      <div class="section-top">
-        <span style="font-size:15px;color:var(--text-muted)" id="newsCount">加载中…</span>
-        <button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ 新增动态</button>
-      </div>
-      <div id="newsList"><p class="loading">加载中…</p></div>
-    </div>
-  </div>
-</div>
-
-<!-- 动态编辑弹窗 -->
+    <!-- 动态编辑弹窗 -->
 <div class="modal-overlay" id="newsModal">
   <div class="modal-box">
     <h3 id="newsModalTitle">新增动态</h3>
@@ -257,6 +255,7 @@
     btn.classList.add("active");
     document.getElementById("tab-cats").style.display=tab==="cats"?"block":"none";
     document.getElementById("tab-messages").style.display=tab==="messages"?"block":"none";
+    document.getElementById("tab-news").style.display=tab==="news"?"block":"none";
     if(tab==="cats")loadCats();
     if(tab==="messages")loadMessages();
     if(tab==="news")loadNewsAdmin();
