@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>页面不见了 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .notfound-wrap {
+      min-height: 80vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 4rem 2rem;
+    }
+    .notfound-emoji { font-size: 72px; margin-bottom: 1.5rem; display: block; }
+    .notfound-title { font-size: 1.8rem; font-weight: 500; color: var(--brown-dark); margin-bottom: 1rem; }
+    .notfound-sub { font-size: 15px; color: var(--text-muted); max-width: 380px; line-height: 1.9; margin-bottom: 2rem; }
+    .notfound-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="notfound-wrap">
+    <span class="notfound-emoji">🐾</span>
+    <h1 class="notfound-title">这只猫把页面藏起来了</h1>
+    <p class="notfound-sub">你访问的页面不存在或已被移走。别担心，回到首页继续探索吧～</p>
+    <div class="notfound-btns">
+      <a href="index.html" class="btn btn-primary">回到首页</a>
+      <a href="cats.html" class="btn btn-outline">认识我们的猫</a>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">PawAlliance</span>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

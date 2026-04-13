@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>隐私政策 · PawAlliance</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .privacy-wrap { max-width: 720px; margin: 0 auto; }
+    .privacy-block {
+      background: var(--white); border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-border); padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .privacy-block h2 {
+      font-size: 1.05rem; font-weight: 500; color: var(--brown-dark);
+      margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--cream-border);
+    }
+    .privacy-block p, .privacy-block li {
+      font-size: 14px; color: var(--text-muted); line-height: 2;
+    }
+    .privacy-block ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+    .privacy-block li { margin-bottom: 4px; }
+    .privacy-updated {
+      font-size: 13px; color: var(--text-hint);
+      text-align: right; margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-fallback" style="display:flex">🐾</div>
+        <span class="logo-text">PawAlliance</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="cats.html" class="nav-link">我们的猫</a>
+        <a href="adopt.html" class="nav-link">云养计划</a>
+        <a href="news.html" class="nav-link">动态公告</a>
+        <a href="message.html" class="nav-link">留言板</a>
+        <a href="about.html" class="nav-link">关于我们</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>隐私政策</h1>
+    <p>我们认真对待每一位访客的隐私</p>
+  </div>
+
+  <section class="section" style="padding-top:1rem;">
+    <div class="container">
+      <div class="privacy-wrap">
+        <p class="privacy-updated">最后更新：2026 年 4 月</p>
+
+        <div class="privacy-block">
+          <h2>我们收集哪些信息</h2>
+          <p>当你使用 PawAlliance 网站时，我们可能收集以下信息：</p>
+          <ul>
+            <li><strong>留言板</strong>：你主动填写的昵称和留言内容。</li>
+            <li><strong>云养计划</strong>：本地浏览器存储（localStorage）中的投喂次数，仅保存在你自己的设备上，不会上传至服务器。</li>
+            <li><strong>访问日志</strong>：由 GitHub Pages 自动收集的基础访问数据（IP 地址、浏览器类型等），我们无法直接获取，请参阅 <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener" style="color:var(--brown-mid)">GitHub 隐私政策</a>。</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h2>我们如何使用这些信息</h2>
+          <ul>
+            <li>留言板中的昵称和内容，仅用于在本网站的留言板页面公开展示。</li>
+            <li>我们不会将任何信息出售、出租或共享给第三方。</li>
+            <li>我们不使用 Cookie 追踪你的浏览行为。</li>
+            <li>我们不投放任何形式的广告。</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h2>数据存储</h2>
+          <p>留言数据存储在 <a href="https://supabase.com" target="_blank" rel="noopener" style="color:var(--brown-mid)">Supabase</a>（一个开源的后端服务平台），服务器位于海外。Supabase 遵守 GDPR 等国际数据保护规范。</p>
+        </div>
+
+        <div class="privacy-block">
+          <h2>你的权利</h2>
+          <ul>
+            <li>你可以要求删除你在留言板发布的任何内容，请通过下方联系方式告知我们。</li>
+            <li>你的浏览器本地存储（投喂次数等）可以随时通过清除浏览器缓存自行删除。</li>
+          </ul>
+        </div>
+
+        <div class="privacy-block">
+          <h2>联系我们</h2>
+          <p>如果你对本隐私政策有任何疑问，或希望删除你的数据，欢迎通过<a href="about.html" style="color:var(--brown-mid)">关于我们</a>页面的联系方式与我们沟通。</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-text">PawAlliance</span>
+        <p>以商养善，让爱延续</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="cats.html">我们的猫</a>
+        <a href="adopt.html">云养计划</a>
+        <a href="news.html">动态公告</a>
+        <a href="message.html">留言板</a>
+        <a href="about.html">关于我们</a>
+        <a href="privacy.html">隐私政策</a>
+      </div>
+      <p class="footer-copy">© 2026 PawAlliance · All rights reserved</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
