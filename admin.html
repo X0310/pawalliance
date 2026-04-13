@@ -76,6 +76,13 @@
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     .section-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+    .news-type-badge { padding:3px 10px; border-radius:8px; font-size:12px; }
+    .type-救助 { background:#FAE0D8; color:#9A3820; }
+    .type-医疗 { background:#F5E0A0; color:#7A5010; }
+    .type-送养 { background:#D4E8C2; color:#3A6020; }
+    .type-云养 { background:#C8E8E0; color:#1A6050; }
+    .type-活动 { background:#E0D8F5; color:#4A3090; }
+    .type-公告 { background:var(--cream-dark); color:var(--text-muted); }
     .empty-tip { color:var(--text-hint); font-size:14px; text-align:center; padding:3rem 0; }
     .loading { text-align:center; color:var(--text-hint); padding:2rem; font-size:14px; }
     .status-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:12px; }
@@ -114,6 +121,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('cats',this)">猫咪档案</button>
       <button class="tab-btn" onclick="switchTab('messages',this)">留言管理</button>
+      <button class="tab-btn" onclick="switchTab('news',this)">动态公告</button>
     </div>
 
     <!-- 猫咪 Tab -->
@@ -172,7 +180,45 @@
   </div>
 </div>
 
+    <!-- 动态公告 Tab -->
+    <div id="tab-news" style="display:none">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)" id="newsCount">加载中…</span>
+        <button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ 新增动态</button>
+      </div>
+      <div id="newsList"><p class="loading">加载中…</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 动态编辑弹窗 -->
+<div class="modal-overlay" id="newsModal">
+  <div class="modal-box">
+    <h3 id="newsModalTitle">新增动态</h3>
+    <input type="hidden" id="editNewsId" />
+    <div class="form-grid">
+      <div class="form-group full"><label>标题 *</label><input type="text" id="nf_title" placeholder="动态标题" /></div>
+      <div class="form-group"><label>类型</label>
+        <select id="nf_type">
+          <option>公告</option><option>救助</option><option>医疗</option>
+          <option>送养</option><option>云养</option><option>活动</option>
+        </select>
+      </div>
+      <div class="form-group"><label>是否发布</label>
+        <select id="nf_published"><option value="true">立即发布</option><option value="false">存为草稿</option></select>
+      </div>
+      <div class="form-group full"><label>摘要（显示在列表页）</label><textarea id="nf_summary" rows="2" placeholder="简短描述，显示在动态列表中"></textarea></div>
+      <div class="form-group full"><label>正文内容（支持HTML）</label><textarea id="nf_content" rows="8" placeholder="详细内容，支持 &lt;p&gt;、&lt;br&gt; 等HTML标签"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeNewsModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveNews()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -213,6 +259,7 @@
     document.getElementById("tab-messages").style.display=tab==="messages"?"block":"none";
     if(tab==="cats")loadCats();
     if(tab==="messages")loadMessages();
+    if(tab==="news")loadNewsAdmin();
   }
 
   // ── API ──
@@ -390,6 +437,69 @@
 
   // 初始化
   if(sessionStorage.getItem("paw_admin")==="1")loadCats();
+
+  // ── 动态公告管理 ──
+  async function loadNewsAdmin(){
+    const el=document.getElementById("newsList");
+    el.innerHTML='<p class="loading">加载中…</p>';
+    const news=await apiGet("news","select=*&order=created_at.desc");
+    document.getElementById("newsCount").textContent="共 "+news.length+" 条动态";
+    if(!news.length){el.innerHTML='<p class="empty-tip">还没有动态，点击右上角新增</p>';return;}
+    const typeMap={"救助":"type-救助","医疗":"type-医疗","送养":"type-送养","云养":"type-云养","活动":"type-活动","公告":"type-公告"};
+    el.innerHTML='<table class="data-table"><thead><tr>'+
+      '<th>类型</th><th>标题</th><th>摘要</th><th>状态</th><th>发布时间</th><th>操作</th>'+
+      '</tr></thead><tbody>'+
+      news.map(function(n){
+        return'<tr>'+
+          '<td><span class="news-type-badge '+( typeMap[n.type]||"") +'">'+esc(n.type)+'</span></td>'+
+          '<td><strong>'+esc(n.title)+'</strong></td>'+
+          '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(n.summary||"")+'</td>'+
+          '<td>'+(n.published?'<span style="color:#3A6020">已发布</span>':'<span style="color:#B0986A">草稿</span>')+'</td>'+
+          '<td>'+(n.created_at?n.created_at.slice(0,10):"")+'</td>'+
+          '<td><div class="action-btns">'+
+          '<button class="btn-edit" onclick=\'editNews('+JSON.stringify(n).replace(/'/g,"\\'")+')\'>编辑</button>'+
+          '<button class="btn-del" onclick="deleteNews(\''+n.id+'\',\''+esc(n.title)+'\')">删除</button>'+
+          '</div></td></tr>';
+      }).join("")+
+      '</tbody></table>';
+  }
+
+  function openNewsModal(n){
+    document.getElementById("newsModalTitle").textContent=n?"编辑动态":"新增动态";
+    document.getElementById("editNewsId").value=n?n.id:"";
+    document.getElementById("nf_title").value=n?n.title:"";
+    document.getElementById("nf_type").value=n?n.type:"公告";
+    document.getElementById("nf_published").value=n?(n.published?"true":"false"):"true";
+    document.getElementById("nf_summary").value=n?(n.summary||""):"";
+    document.getElementById("nf_content").value=n?(n.content||""):"";
+    document.getElementById("newsModal").classList.add("open");
+  }
+  function editNews(n){openNewsModal(n);}
+  function closeNewsModal(){document.getElementById("newsModal").classList.remove("open");}
+
+  async function saveNews(){
+    const id=document.getElementById("editNewsId").value;
+    const data={
+      title:document.getElementById("nf_title").value.trim(),
+      type:document.getElementById("nf_type").value,
+      published:document.getElementById("nf_published").value==="true",
+      summary:document.getElementById("nf_summary").value.trim(),
+      content:document.getElementById("nf_content").value.trim()
+    };
+    if(!data.title){showToast("标题不能为空");return;}
+    if(id){await apiPatch("news",id,data);}
+    else{await apiPost("news",data);}
+    closeNewsModal();
+    await loadNewsAdmin();
+    showToast(id?"修改成功 ✓":"发布成功 ✓");
+  }
+
+  async function deleteNews(id,title){
+    if(!confirm("确定删除「"+title+"」吗？"))return;
+    const ok=await apiDelete("news",id);
+    if(ok){await loadNewsAdmin();showToast("已删除「"+title+"」");}
+    else showToast("删除失败，请重试");
+  }
 </script>
 </body>
 </html>
