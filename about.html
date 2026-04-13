@@ -4,7 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>关于我们 · PawAlliance</title>
+  <meta name="description" content="PawAlliance 团队介绍、项目理念与联系方式。" />
+  <meta property="og:title" content="关于我们 · PawAlliance" />
+  <meta property="og:description" content="以商养善为核心理念，探索流浪猫治理与宠物经济相融合的可持续运营体系。" />
+  <meta property="og:image" content="https://ecvwyfolfitogyeiywbe.supabase.co/storage/v1/object/public/assets/og-cover.jpg" />
+  <meta property="og:type" content="website" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .about-section { max-width: 720px; margin: 0 auto; }
+    .about-block {
+      background: var(--white); border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-border); padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .about-block h2 {
+      font-size: 1.1rem; font-weight: 500; color: var(--brown-dark);
+      margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--cream-border);
+    }
+    .about-block p { font-size: 14px; color: var(--text-muted); line-height: 2; margin-bottom: 0.8rem; }
+    .about-block p:last-child { margin-bottom: 0; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .team-card {
+      background: var(--cream-dark); border-radius: var(--radius-md);
+      padding: 1.25rem; text-align: center;
+    }
+    .team-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--brown-light); display: flex; align-items: center;
+      justify-content: center; font-size: 24px; margin: 0 auto 0.8rem;
+    }
+    .team-name { font-size: 15px; font-weight: 500; color: var(--brown-dark); margin-bottom: 4px; }
+    .team-role { font-size: 13px; color: var(--text-hint); }
+    .contact-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-border); }
+    .contact-row:last-child { border-bottom: none; }
+    .contact-label { font-size: 13px; color: var(--text-hint); min-width: 60px; }
+    .contact-value { font-size: 14px; color: var(--text-muted); }
+    .milestone-list { list-style: none; padding: 0; margin-top: 0.5rem; }
+    .milestone-list li {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid var(--cream-border); font-size: 14px;
+    }
+    .milestone-list li:last-child { border-bottom: none; }
+    .milestone-date { color: var(--brown-mid); font-weight: 500; min-width: 88px; flex-shrink: 0; }
+    .milestone-text { color: var(--text-muted); line-height: 1.7; }
+  </style>
 </head>
 <body>
   <nav class="navbar" id="navbar">
@@ -41,23 +85,48 @@
           <p>最终，本项目希望推动社会对动物生命价值认知提升，探索一条可扩展、标准化、具有现实落地能力的宠物公益商业新路径。</p>
         </div>
 
-        <!-- ✏️ 在下面添加新模块，复制以下格式即可 -->
         <div class="about-block">
           <h2>我们在做什么</h2>
-          <p>✏️ 这里预留给团队介绍、项目进展、合作信息等内容，可随时编辑更新。</p>
+          <p>目前，PawAlliance 正处于项目孵化阶段，主要聚焦在以下几个方向：</p>
+          <p><strong>流浪猫档案化管理</strong> — 为每一只救助猫咪建立完整的数字档案，包括健康状况、性格特点与救助过程，让每一只猫都被看见。</p>
+          <p><strong>云养计划</strong> — 探索线上虚拟参与模式，让不在现场的爱心人士也能为猫咪提供实质性的物质支持。</p>
+          <p><strong>以商养善模式探索</strong> — 通过宠物周边、联名产品等商业化路径，使公益行为具备可持续性，摆脱对纯捐助的依赖。</p>
+        </div>
+
+        <div class="about-block">
+          <h2>项目进展</h2>
+          <ul class="milestone-list">
+            <li>
+              <span class="milestone-date">2026 年 4 月</span>
+              <span class="milestone-text">PawAlliance 官网正式上线，第一位居民异瞳猫咪入驻。</span>
+            </li>
+            <li>
+              <span class="milestone-date">进行中</span>
+              <span class="milestone-text">完善猫咪档案管理系统，建立云养用户基础社群。</span>
+            </li>
+            <li>
+              <span class="milestone-date">规划中</span>
+              <span class="milestone-text">探索宠物周边产品线，推出第一款"以商养善"联名商品。</span>
+            </li>
+          </ul>
         </div>
 
         <div class="about-block">
           <h2>联系我们</h2>
-          <p>✏️ 这里预留联系方式，如邮箱、社交媒体账号等。</p>
+          <!-- ✏️ 请将下面的联系方式替换为你们真实的信息 -->
+          <div class="contact-row">
+            <span class="contact-label">微信公众号</span>
+            <span class="contact-value">搜索「PawAlliance」关注我们</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">邮箱</span>
+            <span class="contact-value">hello@pawalliance.org（示例，请替换）</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">合作咨询</span>
+            <span class="contact-value">欢迎品牌、公益组织与我们探讨合作可能</span>
+          </div>
         </div>
-
-        <!-- ✏️ 如需添加更多模块，复制下面这段并修改内容：
-        <div class="about-block">
-          <h2>新模块标题</h2>
-          <p>内容写在这里。</p>
-        </div>
-        -->
 
       </div>
     </div>
@@ -66,6 +135,12 @@
   <footer class="footer">
     <div class="container footer-inner">
       <span class="logo-text">PawAlliance</span>
+      <div class="footer-links" style="margin-bottom:0.5rem">
+        <a href="index.html">首页</a>
+        <a href="cats.html">我们的猫</a>
+        <a href="news.html">动态公告</a>
+        <a href="privacy.html">隐私政策</a>
+      </div>
       <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
     </div>
   </footer>

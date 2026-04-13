@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>云养计划 · PawAlliance</title>
+  <meta name="description" content="不在现场，也能参与守护。加入 PawAlliance 云养计划，让每一次点击都有意义。" />
+  <meta property="og:title" content="云养计划 · PawAlliance" />
+  <meta property="og:description" content="不在现场，也能参与守护。加入 PawAlliance 云养计划，让每一次点击都有意义。" />
+  <meta property="og:image" content="https://ecvwyfolfitogyeiywbe.supabase.co/storage/v1/object/public/assets/og-cover.jpg" />
+  <meta property="og:type" content="website" />
   <link rel="stylesheet" href="style.css" />
   <style>
     .feed-btn-wrap { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
@@ -142,7 +147,7 @@
         const feedKey = `feed_${cat.id}`;
         const feedCount = parseInt(localStorage.getItem(feedKey) || "0");
         const photoHTML = cat.photo
-          ? `<img src="${cat.photo}" alt="${cat.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="adopt-cat-emoji" style="display:none;font-size:48px;width:100%;height:100%;align-items:center;justify-content:center;">🐱</div>`
+          ? `<img loading="lazy" src="${cat.photo}" alt="${cat.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="adopt-cat-emoji" style="display:none;font-size:48px;width:100%;height:100%;align-items:center;justify-content:center;">🐱</div>`
           : `<div style="font-size:48px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">🐱</div>`;
         return `
           <div class="adopt-cat-item" id="adoptItem_${cat.id}">
@@ -193,6 +198,9 @@
       document.getElementById("paymentModal").classList.remove("open");
     }
 
+    const SUPABASE_URL2 = "https://ecvwyfolfitogyeiywbe.supabase.co";
+    const SUPABASE_KEY2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdnd5Zm9sZml0b2d5ZWl5d2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDM3NjEsImV4cCI6MjA5MDk3OTc2MX0.zIhjbFHEw3cGKkPYZjAA4vi6X-D7N9xVI_rcx8hrzEs";
+
     function confirmFeed() {
       // 模拟支付成功
       const feedKey = `feed_${currentCatId}`;
@@ -200,8 +208,8 @@
       localStorage.setItem(feedKey, count);
 
       // 更新次数显示
-      const countEl = document.getElementById(`feedCount_${currentCatId}`);
-      if (countEl) countEl.textContent = `累计投喂：${count} 次`;
+      const numEl = document.getElementById(`feedNum_${currentCatId}`);
+      if (numEl) numEl.textContent = count;
 
       // 显示反馈
       const resultEl = document.getElementById(`feedResult_${currentCatId}`);

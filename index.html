@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PawAlliance · 以商养善</title>
+  <!-- SEO & 分享预览 -->
+  <meta name="description" content="PawAlliance 探索流浪猫治理与宠物经济融合的可持续路径，让每一次消费成为一次善举。" />
+  <meta property="og:title" content="PawAlliance · 以商养善" />
+  <meta property="og:description" content="探索流浪猫治理与宠物经济融合的可持续路径，让每一次消费成为一次善举。" />
+  <meta property="og:image" content="https://ecvwyfolfitogyeiywbe.supabase.co/storage/v1/object/public/assets/og-cover.jpg" />
+  <meta property="og:url" content="https://pawalliance.github.io/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -137,6 +145,7 @@
         <a href="news.html">动态公告</a>
         <a href="message.html">留言板</a>
         <a href="about.html">关于我们</a>
+        <a href="privacy.html">隐私政策</a>
       </div>
       <p class="footer-copy">© 2026 PawAlliance · All rights reserved</p>
     </div>
@@ -176,37 +185,56 @@
         }).join("");
       }catch(e){el.innerHTML='<p class="empty-tip">加载失败</p>';}
     }
-    loadNewsPreview();
-
-    // ── 首页统计数字 - 从 Supabase 读取 ──
+    // ── 首页统计数字（带5分钟本地缓存，减少 API 请求）──
+    function animateTo(elId,target){
+      const el=document.getElementById(elId);
+      if(!el)return;
+      if(!target){el.textContent="0";return;}
+      let cur=0;const step=Math.ceil(target/40);
+      const t=setInterval(()=>{cur+=step;if(cur>=target){el.textContent=target;clearInterval(t);}else{el.textContent=cur;}},30);
+    }
     async function loadStats(){
       try{
-        const res=await fetch(SUPABASE_URL+"/rest/v1/site_stats?select=*&limit=1",{
-          headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}
-        });
-        const rows=await res.json();
-        if(!rows||!rows.length)return;
-        const d=rows[0];
-        function animateTo(elId,target){
-          const el=document.getElementById(elId);
-          if(!el)return;
-          if(!target){el.textContent="0";return;}
-          let cur=0;
-          const step=Math.ceil(target/40);
-          const t=setInterval(()=>{cur+=step;if(cur>=target){el.textContent=target;clearInterval(t);}else{el.textContent=cur;}},30);
+        const CACHE_KEY="paw_stats_cache";
+        const CACHE_TTL=5*60*1000;
+        const cached=localStorage.getItem(CACHE_KEY);
+        let d=null;
+        if(cached){
+          const obj=JSON.parse(cached);
+          if(Date.now()-obj.ts<CACHE_TTL){d=obj.data;}
         }
-        animateTo("stat-cats",   d.cats     ||0);
-        animateTo("stat-cloud",  d.cloud    ||0);
-        animateTo("stat-adopted",d.adopted  ||0);
-        animateTo("stat-members",d.members  ||0);
+        if(!d){
+          const res=await fetch(SUPABASE_URL+"/rest/v1/site_stats?select=*&limit=1",{
+            headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}
+          });
+          const rows=await res.json();
+          if(!rows||!rows.length)return;
+          d=rows[0];
+          localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:d}));
+        }
+        animateTo("stat-cats",   d.cats    ||0);
+        animateTo("stat-cloud",  d.cloud   ||0);
+        animateTo("stat-adopted",d.adopted ||0);
+        animateTo("stat-members",d.members ||0);
       }catch(e){console.log("stats load failed",e);}
     }
 
-    // 进入视口时触发
+    // 两个请求并行发出，互不阻塞
+    Promise.all([loadNewsPreview(), loadStats().then(()=>{})]);
+
+    // stats 进入视口才触发动画（数据已提前加载）
     const _statsEl=document.querySelector(".stats-section");
     if(_statsEl){
       const _obs=new IntersectionObserver((entries)=>{
-        if(entries[0].isIntersecting){loadStats();_obs.disconnect();}
+        if(entries[0].isIntersecting){
+          const cached=localStorage.getItem("paw_stats_cache");
+          if(cached){
+            const d=JSON.parse(cached).data;
+            animateTo("stat-cats",d.cats||0);animateTo("stat-cloud",d.cloud||0);
+            animateTo("stat-adopted",d.adopted||0);animateTo("stat-members",d.members||0);
+          }
+          _obs.disconnect();
+        }
       },{threshold:0.3});
       _obs.observe(_statsEl);
     }

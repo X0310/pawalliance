@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>我们的猫 · PawAlliance</title>
+  <meta name="description" content="认识 PawAlliance 救助的每一只猫咪，了解她们的故事与性格。" />
+  <meta property="og:title" content="我们的猫 · PawAlliance" />
+  <meta property="og:description" content="每一只都有自己的故事，等待被你看见。" />
+  <meta property="og:image" content="https://ecvwyfolfitogyeiywbe.supabase.co/storage/v1/object/public/assets/og-cover.jpg" />
+  <meta property="og:type" content="website" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -66,7 +71,7 @@
         el.innerHTML = cats.map(function(cat) {
           const statusColor = { "在册": "status-green", "已送养": "status-blue", "医疗中": "status-amber" }[cat.status] || "status-gray";
           const photoHTML = cat.photo_url
-            ? '<img src="' + cat.photo_url + '" alt="' + (cat.昵称||"") + '" class="cat-card-img" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div class="cat-card-emoji" style="display:none">🐱</div>'
+            ? '<img src="' + cat.photo_url + '" alt="' + (cat.昵称||"") + '" class="cat-card-img" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" /><div class="cat-card-emoji" style="display:none">🐱</div>'
             : '<div class="cat-card-emoji">🐱</div>';
           return '<div class="cat-card">' +
             '<div class="cat-card-photo">' + photoHTML +

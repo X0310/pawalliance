@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>留言板 · PawAlliance</title>
+  <meta name="description" content="在 PawAlliance 留下你的想法，我们认真阅读每一条留言。" />
+  <meta property="og:title" content="留言板 · PawAlliance" />
+  <meta property="og:description" content="留下你的想法，我们认真阅读每一条留言。" />
+  <meta property="og:image" content="https://ecvwyfolfitogyeiywbe.supabase.co/storage/v1/object/public/assets/og-cover.jpg" />
+  <meta property="og:type" content="website" />
   <link rel="stylesheet" href="style.css" />
   <style>
     .msg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
@@ -96,6 +101,7 @@
           </div>
           <button class="btn btn-primary" id="submitBtn" onclick="submitMessage()">提交留言</button>
           <p class="submit-tip">感谢你的参与 🐾</p>
+          <p class="submit-tip" style="color:var(--text-hint);font-size:12px;margin-top:4px">留言将在管理员审核后显示，通常在 24 小时内完成</p>
           <p class="cooldown-tip" id="cooldownTip"></p>
         </div>
         <div class="msg-header">
@@ -118,7 +124,7 @@
   <footer class="footer">
     <div class="container footer-inner">
       <span class="logo-text">PawAlliance</span>
-      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续</p>
+      <p class="footer-copy">© 2026 PawAlliance · 以商养善，让爱延续 · <a href="privacy.html" style="color:var(--text-hint)">隐私政策</a></p>
     </div>
   </footer>
 
@@ -186,7 +192,7 @@
       const el=document.getElementById("messageList");
       try{
         const[messages,replies]=await Promise.all([
-          apiGet("messages","select=*&order=created_at.desc"),
+          apiGet("messages","select=*&approved=eq.true&order=created_at.desc"),
           apiGet("replies","select=*&order=created_at.asc")
         ]);
         document.getElementById("msgCount").textContent="共 "+messages.length+" 条留言";
@@ -230,7 +236,7 @@
         document.getElementById("cooldownTip").style.display="none";
         markSubmit();
         await loadMessages();
-        showToast("留言成功！感谢你的支持 🐾");
+        showToast("留言已提交，审核通过后将显示 🐾");
       }catch(e){showToast("提交失败，请检查网络后重试");}
       finally{btn.textContent="提交留言";btn.disabled=false;}
     }

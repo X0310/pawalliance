@@ -98,6 +98,7 @@
   <div class="login-box">
     <h2>🐾 PawAlliance 管理后台</h2>
     <p>请输入管理员密码登录</p>
+    <p style="font-size:11px;color:#c0392b;background:#fde8e8;border-radius:6px;padding:6px 10px;margin-bottom:0.5rem">⚠️ 安全提示：当前密码以明文存储于前端代码，请勿在公共设备使用，建议尽快升级为 Supabase Auth 登录。</p>
     <div class="form-group">
       <label>管理员密码</label>
       <input type="password" id="passwordInput" placeholder="输入密码" onkeydown="if(event.key==='Enter')login()" />
@@ -121,6 +122,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('cats',this)">猫咪档案</button>
       <button class="tab-btn" onclick="switchTab('messages',this)">留言管理</button>
+      <button class="tab-btn" onclick="switchTab('review',this)">留言审核 <span id="reviewBadge" style="display:none;background:#c0392b;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">0</span></button>
       <button class="tab-btn" onclick="switchTab('news',this)">动态公告</button>
       <button class="tab-btn" onclick="switchTab('stats',this)">网站数据</button>
     </div>
@@ -142,6 +144,14 @@
         <span style="font-size:15px;color:var(--text-muted)" id="msgCount">加载中…</span>
       </div>
       <div id="msgList"><p class="loading">加载中…</p></div>
+    </div>
+
+    <!-- 留言审核 Tab -->
+    <div id="tab-review" style="display:none">
+      <div class="section-top">
+        <span style="font-size:15px;color:var(--text-muted)" id="reviewCount">加载中…</span>
+      </div>
+      <div id="reviewList"><p class="loading">加载中…</p></div>
     </div>
 
     <!-- 动态公告 Tab -->
@@ -290,10 +300,12 @@
     btn.classList.add("active");
     document.getElementById("tab-cats").style.display=tab==="cats"?"block":"none";
     document.getElementById("tab-messages").style.display=tab==="messages"?"block":"none";
+    document.getElementById("tab-review").style.display=tab==="review"?"block":"none";
     document.getElementById("tab-news").style.display=tab==="news"?"block":"none";
     document.getElementById("tab-stats").style.display=tab==="stats"?"block":"none";
     if(tab==="cats")loadCats();
     if(tab==="messages")loadMessages();
+    if(tab==="review")loadReview();
     if(tab==="news")loadNewsAdmin();
     if(tab==="stats")loadStats();
   }
@@ -472,7 +484,16 @@
   }
 
   // 初始化
-  if(sessionStorage.getItem("paw_admin")==="1")loadCats();
+  if(sessionStorage.getItem("paw_admin")==="1"){
+    loadCats();
+    // 异步加载待审核数量，更新 badge
+    apiGet("messages","select=id&or=(approved.eq.false,approved.is.null)").then(function(rows){
+      if(rows&&rows.length>0){
+        const b=document.getElementById("reviewBadge");
+        b.style.display="inline";b.textContent=rows.length;
+      }
+    }).catch(function(){});
+  }
 
   // ── 动态公告管理 ──
   async function loadNewsAdmin(){
@@ -580,6 +601,44 @@
       setTimeout(()=>{msg.style.display="none";},3000);
       showToast("数据已保存 ✓");
     }catch(e){showToast("保存失败，请重试");}
+  }
+
+
+  // ── 留言审核 ──
+  async function loadReview(){
+    const el=document.getElementById("reviewList");
+    el.innerHTML='<p class="loading">加载中…</p>';
+    // 加载待审核（approved=false 或 approved IS NULL）
+    const pending=await apiGet("messages","select=*&or=(approved.eq.false,approved.is.null)&order=created_at.desc");
+    const badge=document.getElementById("reviewBadge");
+    if(pending.length>0){badge.style.display="inline";badge.textContent=pending.length;}
+    else{badge.style.display="none";}
+    document.getElementById("reviewCount").textContent="待审核 "+pending.length+" 条";
+    if(!pending.length){el.innerHTML='<p class="empty-tip">暂无待审核留言 ✓</p>';return;}
+    el.innerHTML=pending.map(function(msg){
+      return'<div class="msg-card" style="border-left:3px solid #F5DCA0" id="rv_'+msg.id+'">'+
+        '<div class="msg-card-header">'+
+        '<div><span class="msg-author">'+esc(msg.name)+'</span><span class="msg-time">'+timeAgo(msg.created_at)+'</span></div>'+
+        '<div style="display:flex;gap:8px">'+
+        '<button class="btn-edit" style="background:#D4E8C2;color:#3A6020;border-color:#A8D088" onclick="approveMsg(''+msg.id+'')">✓ 通过</button>'+
+        '<button class="btn-del" onclick="rejectMsg(''+msg.id+'',''+esc(msg.name||"")+'')">✕ 拒绝</button>'+
+        '</div></div>'+
+        '<div class="msg-content">'+esc(msg.content)+'</div>'+
+        '</div>';
+    }).join("");
+  }
+
+  async function approveMsg(id){
+    const ok=await apiPatch("messages",id,{approved:true});
+    if(ok){await loadReview();showToast("已通过 ✓");}
+    else showToast("操作失败，请重试");
+  }
+
+  async function rejectMsg(id,name){
+    if(!confirm("确定拒绝并删除「"+name+"」的留言吗？"))return;
+    const ok=await apiDelete("messages",id);
+    if(ok){await loadReview();showToast("已拒绝并删除");}
+    else showToast("操作失败，请重试");
   }
 
 </script>
