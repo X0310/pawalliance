@@ -143,7 +143,8 @@
     function markSubmit(){localStorage.setItem("paw_last_submit",Date.now().toString());}
 
     async function apiGet(t,q){const r=await fetch(SUPABASE_URL+"/rest/v1/"+t+"?"+q,{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}});return r.json();}
-    async function apiPost(t,b){const r=await fetch(SUPABASE_URL+"/rest/v1/"+t,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=representation"},body:JSON.stringify(b)});return r.json();}
+    // ✅ 修复：使用 return=minimal，避免 INSERT 后因 RLS 无法 SELECT 而导致整个事务回滚
+    async function apiPost(t,b){const r=await fetch(SUPABASE_URL+"/rest/v1/"+t,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=minimal"},body:JSON.stringify(b)});return r;}
     async function apiPatch(t,id,b){await fetch(SUPABASE_URL+"/rest/v1/"+t+"?id=eq."+encodeURIComponent(id),{method:"PATCH",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=minimal"},body:JSON.stringify(b)});}
 
     function renderSubReplies(replies,parentId){
@@ -231,8 +232,9 @@
       const btn=document.getElementById("submitBtn");
       btn.textContent="提交中…";btn.disabled=true;
       try{
-        // ✅ 新增 approved:false，确保新留言进入待审核队列
-        await apiPost("messages",{name:name, content:content, reply:"", likes:0, approved:false});
+        // ✅ approved:false 进入待审核，return=minimal 避免 RLS 回滚
+        const r=await apiPost("messages",{name:name, content:content, reply:"", likes:0, approved:false});
+        if(!r.ok){throw new Error("HTTP "+r.status);}
         document.getElementById("msgName").value="";
         document.getElementById("msgContent").value="";
         document.getElementById("charCount").textContent="0";
@@ -267,7 +269,7 @@
       const content=document.getElementById("rc_"+msgId).value.trim();
       if(!name){showToast("请填写昵称");return;}
       if(!content){showToast("请填写回复内容");return;}
-      try{await apiPost("replies",{message_id:msgId,parent_reply_id:null,name:name,content:content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      try{const r=await apiPost("replies",{message_id:msgId,parent_reply_id:null,name:name,content:content,likes:0,is_admin:false});if(!r.ok)throw new Error(r.status);await loadMessages();showToast("回复成功 🐾");}
       catch(e){showToast("回复失败，请重试");}
     }
 
@@ -276,7 +278,7 @@
       const content=document.getElementById("src_"+parentReplyId).value.trim();
       if(!name){showToast("请填写昵称");return;}
       if(!content){showToast("请填写回复内容");return;}
-      try{await apiPost("replies",{message_id:msgId,parent_reply_id:parentReplyId,name:name,content:content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      try{const r=await apiPost("replies",{message_id:msgId,parent_reply_id:parentReplyId,name:name,content:content,likes:0,is_admin:false});if(!r.ok)throw new Error(r.status);await loadMessages();showToast("回复成功 🐾");}
       catch(e){showToast("回复失败，请重试");}
     }
 
