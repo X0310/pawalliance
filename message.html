@@ -158,7 +158,7 @@
           '<span class="reply-time">'+timeAgo(r.created_at)+'</span>'+
           '<div class="reply-text">'+esc(r.content)+'</div>'+
           '<div class="reply-actions">'+
-          '<button class="reply-like-btn '+(liked?"liked":"") +'" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
+          '<button class="reply-like-btn '+(liked?"liked":"")+'\" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
           '</div></div></div>';
       }).join("")+'</div>';
     }
@@ -176,7 +176,7 @@
           '<span class="reply-time">'+timeAgo(r.created_at)+'</span>'+
           '<div class="reply-text">'+esc(r.content)+'</div>'+
           '<div class="reply-actions">'+
-          '<button class="reply-like-btn '+(liked?"liked":"") +'" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
+          '<button class="reply-like-btn '+(liked?"liked":"")+'\" onclick="likeReply(\''+r.id+'\',this)">👍 '+(r.likes||0)+'</button>'+
           '<button class="reply-btn" onclick="toggleSubReplyForm(\''+r.id+'\')">回复</button>'+
           '</div>'+
           renderSubReplies(replies,r.id)+
@@ -192,14 +192,16 @@
       const el=document.getElementById("messageList");
       try{
         const[messages,replies]=await Promise.all([
+          // ✅ 只加载已审核通过（approved=true）的留言
           apiGet("messages","select=*&approved=eq.true&order=created_at.desc"),
           apiGet("replies","select=*&order=created_at.asc")
         ]);
+        if(!Array.isArray(messages)){el.innerHTML='<p class="empty-tip">加载失败，请刷新页面重试 😿</p>';return;}
         document.getElementById("msgCount").textContent="共 "+messages.length+" 条留言";
-        if(!messages||messages.length===0){el.innerHTML='<p class="empty-tip">还没有留言，来成为第一位吧～</p>';return;}
+        if(!messages.length){el.innerHTML='<p class="empty-tip">还没有留言，来成为第一位吧～</p>';return;}
         el.innerHTML=messages.map(function(msg){
           const liked=isLiked("msg_"+msg.id);
-          const msgReplies=replies.filter(r=>r.message_id===msg.id);
+          const msgReplies=Array.isArray(replies)?replies.filter(r=>r.message_id===msg.id):[];
           const replyCount=msgReplies.length;
           return'<div class="message-item" id="msg_'+msg.id+'">'+
             '<div><span class="message-author">'+esc(msg.name)+'</span>'+
@@ -207,7 +209,7 @@
             '<div class="message-content">'+esc(msg.content)+'</div>'+
             (msg.reply?'<div class="admin-reply"><div class="admin-reply-label">🐾 PawAlliance 回复</div><div class="admin-reply-content">'+esc(msg.reply)+'</div></div>':'')+
             '<div class="msg-actions">'+
-            '<button class="like-btn '+(liked?"liked":"") +'" onclick="likeMessage(\''+msg.id+'\',this)">👍 '+(msg.likes||0)+'</button>'+
+            '<button class="like-btn '+(liked?"liked":"")+'\" onclick="likeMessage(\''+msg.id+'\',this)">👍 '+(msg.likes||0)+'</button>'+
             '<button class="reply-toggle-btn" onclick="toggleReplyForm(\''+msg.id+'\')">💬 回复'+(replyCount>0?"（"+replyCount+"）":"")+'</button>'+
             '</div>'+
             renderReplies(msgReplies,msg.id)+
@@ -229,13 +231,13 @@
       const btn=document.getElementById("submitBtn");
       btn.textContent="提交中…";btn.disabled=true;
       try{
-        await apiPost("messages",{name,content,reply:"",likes:0});
+        // ✅ 新增 approved:false，确保新留言进入待审核队列
+        await apiPost("messages",{name:name, content:content, reply:"", likes:0, approved:false});
         document.getElementById("msgName").value="";
         document.getElementById("msgContent").value="";
         document.getElementById("charCount").textContent="0";
         document.getElementById("cooldownTip").style.display="none";
         markSubmit();
-        await loadMessages();
         showToast("留言已提交，审核通过后将显示 🐾");
       }catch(e){showToast("提交失败，请检查网络后重试");}
       finally{btn.textContent="提交留言";btn.disabled=false;}
@@ -265,7 +267,7 @@
       const content=document.getElementById("rc_"+msgId).value.trim();
       if(!name){showToast("请填写昵称");return;}
       if(!content){showToast("请填写回复内容");return;}
-      try{await apiPost("replies",{message_id:msgId,parent_reply_id:null,name,content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      try{await apiPost("replies",{message_id:msgId,parent_reply_id:null,name:name,content:content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
       catch(e){showToast("回复失败，请重试");}
     }
 
@@ -274,7 +276,7 @@
       const content=document.getElementById("src_"+parentReplyId).value.trim();
       if(!name){showToast("请填写昵称");return;}
       if(!content){showToast("请填写回复内容");return;}
-      try{await apiPost("replies",{message_id:msgId,parent_reply_id:parentReplyId,name,content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
+      try{await apiPost("replies",{message_id:msgId,parent_reply_id:parentReplyId,name:name,content:content,likes:0,is_admin:false});await loadMessages();showToast("回复成功 🐾");}
       catch(e){showToast("回复失败，请重试");}
     }
 
